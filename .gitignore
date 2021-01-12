@@ -1,0 +1,12 @@
+# Project place file
+/benchmarker.rbxlx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+*.rbxlx
+
+# extensions
+*.toml
+/.vscode
+*.bat
