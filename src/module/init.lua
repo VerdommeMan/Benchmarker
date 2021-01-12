@@ -1,7 +1,7 @@
 local Benchmarker = {}
 Benchmarker.__index = Benchmarker
 
-local DEFAULT_AMOUNT_OPERATIONS = 1e6
+local DEFAULT_AMOUNT_OPERATIONS = 1e3
 local DEFAULT_DURATION = 1 -- seconds
 local STEP = 0.1
 
@@ -51,7 +51,7 @@ function Benchmarker:getAvg(func, ...)
     end
 end
 
-function Benchmarker:getOperations(func, ...)
+function Benchmarker:getOperations(func, ...) --need better name
     if isFunction(func) then
         local amount = 0
         local totalTime = 0
@@ -86,6 +86,17 @@ function Benchmarker:getOperations(func, ...)
         totalTime += subTime
        
         return amount, totalTime, amount / self.duration
+    else
+        error("Wrong parameters given")
+    end  
+end
+
+function Benchmarker:benchmark(func, ...)
+    if isFunction(func) then
+        local avg, totalTime = self:getAvg(func, ...)
+        print("The function took on average: ", avg, "s and took in total: ", totalTime, "s with ", self.operations, " cycles")
+        local totalAmount, totalTime, amountPerS = self:getOperations(func, ...)
+        print("The function was called ", totalAmount, "times in ", totalTime, "s (".. amountPerS.."/s)")
     else
         error("Wrong parameters given")
     end  
