@@ -21,7 +21,8 @@ function Benchmarker.new(amountOperations, duration, showProgress, convertNumber
         duration = duration or DEFAULT_DURATION,
         operations = amountOperations or DEFAULT_AMOUNT_OPERATIONS,
         showProgress = showProgress,
-        showFullInfo = showFullInfo == nil and true or showFullInfo
+        showFullInfo = showFullInfo == nil and true or showFullInfo,
+        noYieldTime = noYieldTime or DEFAULT_NO_YIELD_TIME
     }, Benchmarker)
 end
 
@@ -56,10 +57,10 @@ function Benchmarker:getAvg(func, ...)
         if self.showProgress then
             print("Calculating average cycle")
         end
-        
+
         while amount < ops do
             local subTime = 0
-            while subTime < DEFAULT_NO_YIELD_TIME and amount < ops do
+            while subTime < self.noYieldTime and amount < ops do
                 local startTime = os.clock()
                 func(...)
                 subTime +=  os.clock() - startTime
@@ -82,8 +83,8 @@ function Benchmarker:getOperations(func, ...) --need better name
     if isFunction(func) then
         local amount = 0
         local totalTime = 0
-        local remainder = self.duration % DEFAULT_NO_YIELD_TIME
-        local loops = (self.duration - remainder) / DEFAULT_NO_YIELD_TIME
+        local remainder = self.duration % self.noYieldTime
+        local loops = (self.duration - remainder) / self.noYieldTime
 
         if self.showProgress then
             print("Calculating amount of cycles for the given duration")
@@ -91,7 +92,7 @@ function Benchmarker:getOperations(func, ...) --need better name
 
         for i = 1, loops  do
             local subTime = 0
-            while subTime < DEFAULT_NO_YIELD_TIME do
+            while subTime < self.noYieldTime do
                 local startTime = os.clock()
                 func(...)
                 subTime +=  os.clock() - startTime
