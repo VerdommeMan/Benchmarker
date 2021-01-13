@@ -12,7 +12,7 @@ local benchmark2 = Benchmarker.new(1e3, 2, false, false, false)
 -- print("######################")
 -- benchmark2:compare(math.floor, math.round, 1, 10.4144, 10.4144 )
 -- print("######################")
--- Benchmarker:compare(math.floor, math.round, 1, 10.4144, 10.4144 )
+ Benchmarker:compare(math.floor, math.round, 1, 10.4144, 10.4144 )
 
 local tbl = table.create(1e6,"t")
 

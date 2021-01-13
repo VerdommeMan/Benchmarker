@@ -7,14 +7,17 @@ local DEFAULT_NO_YIELD_TIME = 0.1
 
 local RunService = game:GetService('RunService')
 
+local prefixes = {"K", "M", "G", "T", "P", "E", "Z", "Y"}
 
 local function isFunction(arg)
-    return arg and type(arg) == "function"
+    return type(arg) == "function"
 end
 
 local function getPercentage(old, new)
     return (new - old) / old * 100   
 end
+
+
 
 function Benchmarker.new(amountOperations, duration, showProgress, convertNumbersToUnits, showFullInfo, noYieldTime) -- set the configuration
     return setmetatable({
@@ -29,7 +32,7 @@ end
 
 function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
     if isFunction(func1) and isFunction(func2) then
-        self:print("Performing an comparison between function1 and function2 with: "..self.operations.." cycles and a duration of "..self.duration.."s")
+        self:print("Performing an comparison between function1 and function2 with: "..self:toReadable(self.operations).." cycles and a duration of "..self.duration.."s")
         local avg1, totalTime1 = self:getAvg(func1, unpack({...}, 1, funcion1AmountArgs) )
         self:print("Function1 has an average of ".. avg1 .."s per cycle and took in total "..totalTime1.."s")
         local avg2, totalTime2 = self:getAvg(func2, select((funcion1AmountArgs or 0)+1, ...))
@@ -38,9 +41,9 @@ function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
         print(("Function1 average cycle is %.2f%% %s than function2!"):format(p, p < 0 and "slower" or "faster"))
         
         local totalAmount1, _, amountPerS1 = self:getOperations(func1, ...)
-        self:print("function1 was called ", totalAmount1, "times (".. amountPerS1.."/s)")
+        self:print("function1 was called ", self:toReadable(totalAmount1), "times (".. self:toReadable(amountPerS1).."/s)")
         local totalAmount2, _, amountPerS2 = self:getOperations(func2, ...)
-        self:print("function2 was called ", totalAmount2, "times (".. amountPerS2.."/s)")
+        self:print("function2 was called ", self:toReadable(totalAmount2), "times (".. self:toReadable(amountPerS2).."/s)")
         local p2 = getPercentage( amountPerS2, amountPerS1)
         print(("Function1 has %.2f%% %s cycles/s than function2!"):format(p2, p2 < 0 and "less" or "more"))
     else
@@ -69,7 +72,7 @@ function Benchmarker:getAvg(func, ...)
             totalTime += subTime
             RunService.Heartbeat:Wait()
             if self.showProgress then
-                print(("Percent %d%% done!"):format(amount/ops *100))
+                print(("%d%% done!"):format(amount/ops *100))
             end
         end 
 
@@ -101,7 +104,7 @@ function Benchmarker:getOperations(func, ...) --need better name
             totalTime += subTime
             RunService.Heartbeat:Wait()
             if self.showProgress then
-                print(("Percent %d%% done!"):format(i/loops *100))
+                print(("%d%% done!"):format(i/loops *100))
             end
         end
 
@@ -125,9 +128,9 @@ end
 function Benchmarker:benchmark(func, ...)
     if isFunction(func) then
         local avg, totalTime = self:getAvg(func, ...)
-        print("The function took on average: ", avg, "s and took in total: ", totalTime, "s with ", self.operations, " cycles")
+        print("The function took on average: ", avg, "s and took in total: ", totalTime, "s with ", self:toReadable(self.operations), " cycles")
         local totalAmount, time, amountPerS = self:getOperations(func, ...)
-        print("The function was called ", totalAmount, "times in ", time, "s (".. amountPerS.."/s)")
+        print("The function was called ", self:toReadable(totalAmount), "times in ", time, "s (".. self:toReadable(amountPerS).."/s)")
     else
         error("Wrong parameters given")
     end  
@@ -139,6 +142,15 @@ function Benchmarker:print(...)
     end
 end
 
+function Benchmarker:toReadable(number)
+    if self.convUnits then
+        local index = math.floor(math.log10(number) / 3)    
+        if index > 0 and index < #prefixes then
+            return (string.gsub(string.format("%.3f%s",  number / 10^(index * 3), prefixes[index]), "%.?0+(.)$","%1"))
+        end
+    end
+    return number
+end
 
 
 return Benchmarker.new()
