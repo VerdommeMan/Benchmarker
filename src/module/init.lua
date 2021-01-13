@@ -27,12 +27,11 @@ function Benchmarker.new(amountOperations, duration, showProgress, convertNumber
 end
 
 function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
-
     if isFunction(func1) and isFunction(func2) then
         self:print("Performing an comparison between function1 and function2 with: "..self.operations.." cycles and a duration of "..self.duration.."s")
         local avg1, totalTime1 = self:getAvg(func1, unpack({...}, 1, funcion1AmountArgs) )
         self:print("Function1 has an average of ".. avg1 .."s per cycle and took in total "..totalTime1.."s")
-        local avg2, totalTime2 = self:getAvg(func2, select(funcion1AmountArgs+1, ...))
+        local avg2, totalTime2 = self:getAvg(func2, select((funcion1AmountArgs or 0)+1, ...))
         self:print("Function2 has an average of ".. avg2 .."s per cycle and took in total "..totalTime2.."s")
         local p = getPercentage(avg1, avg2)
         print(("Function1 average cycle is %.2f%% %s than function2!"):format(p, p < 0 and "slower" or "faster"))
@@ -48,7 +47,7 @@ function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
     end
 end
 
-function Benchmarker:getAvg(func, ...)
+function Benchmarker:getAvg(func: number, ...)
     if isFunction(func) then
         local totalTime = 0
         local amount = 0
