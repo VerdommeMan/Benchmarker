@@ -21,6 +21,7 @@ function Benchmarker.new(amountOperations, duration, showProgress, convertNumber
         duration = duration or DEFAULT_DURATION,
         operations = amountOperations or DEFAULT_AMOUNT_OPERATIONS,
         showProgress = showProgress,
+        convUnits = convertNumbersToUnits == nil and true or convertNumbersToUnits,
         showFullInfo = showFullInfo == nil and true or showFullInfo,
         noYieldTime = noYieldTime or DEFAULT_NO_YIELD_TIME
     }, Benchmarker)
@@ -47,7 +48,7 @@ function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
     end
 end
 
-function Benchmarker:getAvg(func: number, ...)
+function Benchmarker:getAvg(func, ...)
     if isFunction(func) then
         local totalTime = 0
         local amount = 0
