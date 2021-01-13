@@ -31,14 +31,20 @@ end
 function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
 
     if isFunction(func1) and isFunction(func2) then
-        print("Performing an comparison between function1 and function2 with: "..self.operations.." cycles and duration of "..self.duration.."s")
+        print("Performing an comparison between function1 and function2 with: "..self.operations.." cycles and a duration of "..self.duration.."s")
         local avg1, totalTime1 = self:getAvg(func1, unpack({...}, 1, funcion1AmountArgs) )
-        local avg2, totalTime2 = self:getAvg(func2, select(funcion1AmountArgs+1, ...))
         print("Function1 has an average of ".. avg1 .."s per cycle and took in total "..totalTime1.."s")
+        local avg2, totalTime2 = self:getAvg(func2, select(funcion1AmountArgs+1, ...))
         print("Function2 has an average of ".. avg2 .."s per cycle and took in total "..totalTime2.."s")
         local p = getPercentage(avg1, avg2)
         print(("Function1 average cycle is %.2f%% %s than function2!"):format(p, p < 0 and "slower" or "faster"))
-
+        
+        local totalAmount1, _, amountPerS1 = self:getOperations(func1, ...)
+        print("function1 was called ", totalAmount1, "times (".. amountPerS1.."/s)")
+        local totalAmount2, _, amountPerS2 = self:getOperations(func2, ...)
+        print("function2 was called ", totalAmount2, "times (".. amountPerS2.."/s)")
+        local p2 = getPercentage( amountPerS2, amountPerS1)
+        print(("Function1 has %.2f%% %s cycles/s than function2!"):format(p2, p2 < 0 and "less" or "more"))
     else
         error("Wrong paramaters given!")
     end
@@ -67,7 +73,7 @@ function Benchmarker:getOperations(func, ...) --need better name
         local totalTime = 0
         local remainder = self.duration % DEFAULT_NO_YIELD
         local loops = (self.duration - remainder) / DEFAULT_NO_YIELD
-        print(self.duration, loops, remainder)
+        --print(self.duration, loops, remainder)
 
         for i = 1, loops  do
             local subTime = 0
