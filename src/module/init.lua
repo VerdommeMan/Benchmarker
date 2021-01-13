@@ -3,7 +3,7 @@ Benchmarker.__index = Benchmarker
 
 local DEFAULT_AMOUNT_OPERATIONS = 1e3
 local DEFAULT_DURATION = 1 -- seconds
-local DEFAULT_NO_YIELD = 0.1
+local DEFAULT_NO_YIELD_TIME = 0.1
 
 local RunService = game:GetService('RunService')
 
@@ -12,15 +12,11 @@ local function isFunction(arg)
     return arg and type(arg) == "function"
 end
 
-local function delay(index, mod)
-    return (index % (mod or 10 )) == 0 and RunService.Heartbeat:Wait() or 0
-end
-
 local function getPercentage(old, new)
     return (new - old) / old * 100   
 end
 
-function Benchmarker.new(amountOperations, duration, showProgress, convertNumbersToUnits, showFullInfo) -- set the configuration
+function Benchmarker.new(amountOperations, duration, showProgress, convertNumbersToUnits, showFullInfo, noYieldTime) -- set the configuration
     return setmetatable({
         duration = duration or DEFAULT_DURATION,
         operations = amountOperations or DEFAULT_AMOUNT_OPERATIONS,
@@ -53,15 +49,25 @@ end
 function Benchmarker:getAvg(func, ...)
     if isFunction(func) then
         local totalTime = 0
+        local amount = 0
+        local ops = self.operations
 
-        for i = 1, self.operations do
-            local startTime = os.clock()
-            func(...)
-            totalTime +=  os.clock() - startTime
-            delay(i)
-        end
+        while amount < ops do
+            local subTime = 0
+            while subTime < DEFAULT_NO_YIELD_TIME and amount < ops do
+                local startTime = os.clock()
+                func(...)
+                subTime +=  os.clock() - startTime
+                amount += 1
+            end
+            totalTime += subTime
+            RunService.Heartbeat:Wait()
+            if self.showProgress then
+                print(("Percent %d%% done!"):format(amount/ops *100))
+            end
+        end 
 
-        return totalTime / self.operations, totalTime
+        return totalTime / ops, totalTime
     else
         error("Wrong parameters given")
     end
@@ -71,13 +77,13 @@ function Benchmarker:getOperations(func, ...) --need better name
     if isFunction(func) then
         local amount = 0
         local totalTime = 0
-        local remainder = self.duration % DEFAULT_NO_YIELD
-        local loops = (self.duration - remainder) / DEFAULT_NO_YIELD
+        local remainder = self.duration % DEFAULT_NO_YIELD_TIME
+        local loops = (self.duration - remainder) / DEFAULT_NO_YIELD_TIME
         --print(self.duration, loops, remainder)
 
         for i = 1, loops  do
             local subTime = 0
-            while subTime < DEFAULT_NO_YIELD do
+            while subTime < DEFAULT_NO_YIELD_TIME do
                 local startTime = os.clock()
                 func(...)
                 subTime +=  os.clock() - startTime
