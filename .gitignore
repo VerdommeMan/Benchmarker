@@ -10,3 +10,6 @@
 *.toml
 /.vscode
 *.bat
+
+# test files
+test.server.lua
