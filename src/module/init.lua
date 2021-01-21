@@ -3,7 +3,7 @@ Benchmarker.__index = Benchmarker
 
 local RunService = game:GetService('RunService')
 
-local prefixes = {"K", "M", "G", "T", "P", "E", "Z", "Y", [-1] = "m", [-2] = "μ", [-3] = "n", [-4] = "p", [-5] = "f", [-6] = "a", [-7] = "z", [-8] = "y"}
+local prefixes = {"K", "M", "G", "T", "P", "E", "Z", "Y", [0] = "", [-1] = "m", [-2] = "μ", [-3] = "n", [-4] = "p", [-5] = "f", [-6] = "a", [-7] = "z", [-8] = "y"}
 
 local function isFunction(arg)
     return type(arg) == "function"
@@ -52,77 +52,53 @@ function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
 end
 
 function Benchmarker:getAvg(func, ...)
-    if isFunction(func) then
-        local totalTime = 0
-        local amount = 0
-        local ops = self.cycles
+    assert(isFunction(func), "Wrong parameters given")
+    local amount = 0
+    local totalTime = 0
 
-        if self.showProgress then
-            print("Calculating average cycle")
-        end
-
-        while amount < ops do
-            local subTime = 0
-            while subTime < self.noYieldTime and amount < ops do
-                local startTime = os.clock()
-                func(...)
-                subTime +=  os.clock() - startTime
-                amount += 1
-            end
-            totalTime += subTime
-            RunService.Heartbeat:Wait()
-            if self.showProgress then
-                print(("%d%% done!"):format(amount/ops *100))
-            end
-        end 
-
-        return totalTime / ops, totalTime
-    else
-        error("Wrong parameters given")
+    if self.showProgress then
+        print("Calculating average cycle")
     end
+
+    while amount < self.cycles do
+        while totalTime % self.noYieldTime < self.noYieldTime and amount < self.cycles do
+            local startTime = os.clock()
+            func(...)
+            totalTime +=  os.clock() - startTime
+            amount += 1
+        end
+        RunService.Heartbeat:Wait()
+        if self.showProgress then
+            print(("%d%% done!"):format(amount / self.cycles * 100))
+        end
+    end 
+
+    return totalTime / self.cycles, totalTime
 end
 
 function Benchmarker:getCycles(func, ...) --need better name, gets the the cycles for the set duration
-    if isFunction(func) then
-        local amount = 0
-        local totalTime = 0
-        local remainder = self.duration % self.noYieldTime
-        local loops = (self.duration - remainder) / self.noYieldTime
+    assert(isFunction(func), "Wrong parameters given")
+    local amount = 0
+    local totalTime = 0
 
-        if self.showProgress then
-            print("Calculating amount of cycles for the given duration")
-        end
+    if self.showProgress then
+        print("Calculating amount of cycles for the given duration")
+    end
 
-        for i = 1, loops  do
-            local subTime = 0
-            while subTime < self.noYieldTime do
-                local startTime = os.clock()
-                func(...)
-                subTime +=  os.clock() - startTime
-                amount += 1
-            end
-            totalTime += subTime
-            RunService.Heartbeat:Wait()
-            if self.showProgress then
-                print(("%d%% done!"):format(i/loops *100))
-            end
-        end
-
-        local subTime = 0
-
-        RunService.Heartbeat:Wait()
-        while subTime < remainder do
+    while totalTime < self.duration do
+        while totalTime % self.noYieldTime < self.noYieldTime and totalTime < self.duration do
             local startTime = os.clock()
             func(...)
-            subTime +=  os.clock() - startTime
+            totalTime +=  os.clock() - startTime
             amount += 1
         end
-        totalTime += subTime
-       
-        return amount, totalTime, amount / self.duration
-    else
-        error("Wrong parameters given")
-    end  
+        RunService.Heartbeat:Wait()
+        if self.showProgress then
+            print(("%d%% done!"):format(totalTime/self.duration *100))
+        end
+    end
+    
+    return amount, totalTime, amount / self.duration
 end
 
 function Benchmarker:benchmark(func, ...)
@@ -146,8 +122,8 @@ function Benchmarker:toReadable(...)
     for _, number in ipairs({...}) do
         if isNumber(number) then
             local index = math.floor(math.log10(number) / 3)    
-            if self.convUnits and index > -10 and index < 9 then
-                table.insert(returns, (string.gsub(string.format("%." .. self.precision .. "f",  number / 10 ^ (index * 3)), "%.?0+$","") .. (prefixes[index] or "")))
+            if self.convUnits and index > -9 and index < 9 then
+                table.insert(returns, (string.gsub(string.format("%." .. self.precision .. "f",  number / 10 ^ (index * 3)), "%.?0+$", "") .. prefixes[index]))
             else
                 table.insert(returns, string.format("%g", number))
             end
