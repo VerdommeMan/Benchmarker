@@ -1,9 +1,9 @@
 local Benchmarker = {}
 Benchmarker.__index = Benchmarker
 
-local RunService = game:GetService('RunService')
+local readableNumbers = require(script:WaitForChild("ReadableNumbers")).new()
 
-local prefixes = {"K", "M", "G", "T", "P", "E", "Z", "Y", [0] = "", [-1] = "m", [-2] = "μ", [-3] = "n", [-4] = "p", [-5] = "f", [-6] = "a", [-7] = "z", [-8] = "y"}
+local RunService = game:GetService('RunService')
 
 local function isFunction(arg)
     return type(arg) == "function"
@@ -17,15 +17,14 @@ local function getPercentage(old, new)
     return (new - old) / old * 100   
 end
 
-function Benchmarker.new(cycles, duration, showProgress, convertNumbersToUnits, showFullInfo, noYieldTime, precision) -- set the configuration
+function Benchmarker.new(cycles, duration, showProgress, showFullInfo, ReadableNumbers, noYieldTime) -- set the configuration
     return setmetatable({
         duration = duration or 1,
         cycles = cycles or 1e3,
         showProgress = showProgress,
-        convUnits = convertNumbersToUnits == nil and true or convertNumbersToUnits,
         showFullInfo = showFullInfo == nil and true or showFullInfo,
+        readableNumbers = ReadableNumbers == nil and readableNumbers or ReadableNumbers ,
         noYieldTime = noYieldTime or 0.1,
-        precision = precision or 3
     }, Benchmarker)
 end
 
@@ -61,13 +60,16 @@ function Benchmarker:getAvg(func, ...)
     end
 
     while amount < self.cycles do
-        while totalTime % self.noYieldTime < self.noYieldTime and amount < self.cycles do
+        local subTime = 0
+        while subTime < self.noYieldTime and amount < self.cycles do
             local startTime = os.clock()
             func(...)
-            totalTime +=  os.clock() - startTime
+            subTime +=  os.clock() - startTime
             amount += 1
         end
         RunService.Heartbeat:Wait()
+        totalTime += subTime
+
         if self.showProgress then
             print(("%d%% done!"):format(amount / self.cycles * 100))
         end
@@ -86,13 +88,16 @@ function Benchmarker:getCycles(func, ...) --need better name, gets the the cycle
     end
 
     while totalTime < self.duration do
-        while totalTime % self.noYieldTime < self.noYieldTime and totalTime < self.duration do
+        local subTime = 0
+        while subTime < self.noYieldTime and totalTime + subTime < self.duration do
             local startTime = os.clock()
             func(...)
-            totalTime +=  os.clock() - startTime
+            subTime +=  os.clock() - startTime
             amount += 1
         end
         RunService.Heartbeat:Wait()
+        totalTime += subTime
+
         if self.showProgress then
             print(("%d%% done!"):format(totalTime/self.duration *100))
         end
@@ -118,20 +123,10 @@ function Benchmarker:print(...)
 end
 
 function Benchmarker:toReadable(...)
-    local returns = {}
-    for _, number in ipairs({...}) do
-        if isNumber(number) then
-            local index = math.floor(math.log10(number) / 3)    
-            if self.convUnits and index > -9 and index < 9 then
-                table.insert(returns, (string.gsub(string.format("%." .. self.precision .. "f",  number / 10 ^ (index * 3)), "%.?0+$", "") .. prefixes[index]))
-            else
-                table.insert(returns, string.format("%g", number))
-            end
-        else
-            error("Wrong arguments given, you can give only numbers!")
-        end
+    if self.readableNumbers then
+        return self.readableNumbers:format(...)
     end
-    return unpack(returns)
+    return ...
 end
 
 return Benchmarker.new() -- set default config
