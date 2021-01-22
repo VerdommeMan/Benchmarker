@@ -1,3 +1,6 @@
+-- @Author: VerdommeMan, see https://github.com/VerdommeMan/Benchmarker for more information 
+-- @Version: 1.0.0
+
 local Benchmarker = {}
 Benchmarker.__index = Benchmarker
 
