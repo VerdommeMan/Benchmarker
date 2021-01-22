@@ -72,9 +72,9 @@ function Benchmarker:compare(func1, func2, function1AmountArgs, ...)
     local p = getPercentage(avg1, avg2)
     print(("Function1 average cycle is %.2f%% %s than function2!"):format(p, p < 0 and "slower" or "faster"))
     
-    local totalAmount1, _, amountPerS1 = self:getCycles(func1, unpack({...}, 1, function1AmountArgs))
+    local totalAmount1, amountPerS1 = self:getCycles(func1, unpack({...}, 1, function1AmountArgs))
     self:print(("function1 was called %s times (%s/s)"):format(self:toReadable(totalAmount1, amountPerS1)))
-    local totalAmount2, _, amountPerS2 = self:getCycles(func2, select(function1AmountArgs + 1, ...))
+    local totalAmount2, amountPerS2 = self:getCycles(func2, select(function1AmountArgs + 1, ...))
     self:print(("function2 was called %s times (%s/s)"):format(self:toReadable(totalAmount2, amountPerS2)))
     local p2 = getPercentage( amountPerS2, amountPerS1)
     print(("Function1 has %.2f%% %s cycles/s than function2!"):format(p2, p2 < 0 and "less" or "more"))
@@ -135,15 +135,15 @@ function Benchmarker:getCycles(func, ...) --need better name, gets the the cycle
         end
     end
     
-    return amount, totalTime, amount / self.duration
+    return amount, amount / totalTime, totalTime 
 end
 
 function Benchmarker:benchmark(func, ...)
     assert(isFunction(func), "Wrong argument given for func, expected function but received " .. typeof(func))
 
     self:print(("Performing a benchmark with %s cycles and a duration of %ss"):format(self:toReadable(self.cycles, self.duration)))
-    print(("The function took on average: %ss and took in total: %ss"):format(self:toReadable(self:getAvg(func, ...))))
-    print(("The function was called %s times in %ss (%s/s)"):format(self:toReadable(self:getCycles(func, ...))))
+    print(("The function took on average %ss per cycle and took in total %ss"):format(self:toReadable(self:getAvg(func, ...))))
+    print(("The function was called %s times (%s/s) for the given duration %ss "):format(self:toReadable(self:getCycles(func, ...))))
 end
 
 function Benchmarker:print(...)

@@ -9,7 +9,7 @@ A roblox lua module that allows you to benchmark functions, it benchmarks throug
 - [Notes](#Notes)
 
 ## Download 
-- [from the release page](https://github.com/VerdommeMan/convert-to-human-readable-numbers/releases)
+- [from the release page](https://github.com/VerdommeMan/Benchmarker/releases)
 - [link to roblox asset page](https://www.roblox.com/library/6240410557/ReadableNumbers)
 - or you can build it from [src](src/) using rojo
 
@@ -99,4 +99,33 @@ for i =1, 1e6 do
 end
 print(os.clock() - start2) -- fastest
 ```
+
+## API
+Is in the form of `returnType` **function**(argumentName:`type`, argumentName:`type` defaultValue)
+
+### Constructors
+
+`Benchmarker` **Benchmarker.new**(cycles: `int` 1e3, duration: `number` 1, showProgress: `bool` false, showFullInfo: `bool` true, ReadableNumbers: `false|ReadableNumbers` ReadableNumbers.new(), noYieldTime: `number` 0.1)
+
+It returns a Benchmarker instance, all properties can be changed by indexing the argument name. See customization on what each argument does.
+
+### Methods
+
+#### `void` **Benchmarker:compare**(func1: `function`, func2: `function`, func1AmountArgs: `number`, ...)
+This method does a comparison of the functions on the two modes using the default settings. `func1AmountArgs` splits the vararg on that index. For example:  compare(math.floor, math.round, 1, 10, 15), math.floor gets 10 and math.round gets 15, Another example  compare(select, math.round, 4, 2, "A" , "B", "C", 15) which `2, "A" , "B", "C"` go to select and math.round gets 15.
+The reason for the func1AmountArgs is that it needs to split the varags between the two given functions. It prints the results to the output.
+
+#### `void` **Benchmarker:benchmark**(func: `function`, ...)
+This method prints the result of both modes (cycles for given amount of duration, average tim per cycle of given amount of cycles). The vararg will be passed as the arguments to the function.
+
+### `tuple` avgTimePerCycleInSec: `number`, totalTime: `number` **Benchmarker:getAvg**(func: `function`, ...)
+This method calculates the average time a cycle took for the set amount of cycles. This method is internally used by compare and benchmark. It returns a tuple with the first value the average time per cycle in seconds and the second value the total time it took for all the cycles in seconds.
+
+### `tuple` amount: `number`, amountPerSec: `number`, totalTime: `number` **Benchmarker:getCycles**(func: `function`, ...)
+This method calcualtes how many times the function can be called for a set duration (in seconds). his method is internally used by compare and benchmark. It returns a tuple with the first value the total amount times the function has been called for the set duration. The second value is the amount per second. The third value is the actual amount of duration it took, this should always the be same as the set duration.
+
+## Notes
+- It does only type checking for the arguments, so if you set the properties manually you can set a wrong type.
+- When getting "Script timeout: exhausted allowed execution time" lower the `noYieldTime`.
+- The module yields by default 3s. This allows the server/client to fully start so that it can make more consistent benchmarks
 
