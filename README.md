@@ -95,7 +95,7 @@ print(os.clock() - start1) -- slowest
 
 local start2 = os.clock()
 for i =1, 1e6 do
-    newTbl2[#newTbl3 + 1] = "t"
+    newTbl3[#newTbl3 + 1] = "t"
 end
 print(os.clock() - start2) -- fastest
 ```
