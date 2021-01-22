@@ -10,7 +10,7 @@ A roblox lua module that allows you to benchmark functions, it benchmarks throug
 
 ## Download 
 - [from the release page](https://github.com/VerdommeMan/Benchmarker/releases)
-- [link to roblox asset page](https://www.roblox.com/library/6240410557/ReadableNumbers)
+- [link to roblox asset page](https://www.roblox.com/library/6283802728/Benchmarker)
 - or you can build it from [src](src/) using rojo
 
 
@@ -118,10 +118,10 @@ The reason for the func1AmountArgs is that it needs to split the varags between 
 #### `void` **Benchmarker:benchmark**(func: `function`, ...)
 This method prints the result of both modes (cycles for given amount of duration, average tim per cycle of given amount of cycles). The vararg will be passed as the arguments to the function.
 
-### `tuple` avgTimePerCycleInSec: `number`, totalTime: `number` **Benchmarker:getAvg**(func: `function`, ...)
+#### `tuple` avgTimePerCycleInSec: `number`, totalTime: `number` **Benchmarker:getAvg**(func: `function`, ...)
 This method calculates the average time a cycle took for the set amount of cycles. This method is internally used by compare and benchmark. It returns a tuple with the first value the average time per cycle in seconds and the second value the total time it took for all the cycles in seconds.
 
-### `tuple` amount: `number`, amountPerSec: `number`, totalTime: `number` **Benchmarker:getCycles**(func: `function`, ...)
+#### `tuple` amount: `number`, amountPerSec: `number`, totalTime: `number` **Benchmarker:getCycles**(func: `function`, ...)
 This method calcualtes how many times the function can be called for a set duration (in seconds). his method is internally used by compare and benchmark. It returns a tuple with the first value the total amount times the function has been called for the set duration. The second value is the amount per second. The third value is the actual amount of duration it took, this should always the be same as the set duration.
 
 ## Notes
