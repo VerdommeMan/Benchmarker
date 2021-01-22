@@ -44,7 +44,7 @@ function Benchmarker.new(cycles, duration, showProgress, showFullInfo, ReadableN
     -- type checking
     assert(isInt(cycles), "Wrong argument given for cycles, expected integer but received " .. typeof(cycles))
     assert(isNumber(duration), "wrong argument given for duration, expected a number but received " .. typeof(duration))
-    assert(readableNumbers == false or readableNumbers.format, "Wrong argument given for readableNumbers, expected false/ReadableNumbers object but received " .. typeof(readableNumbers))
+    assert(ReadableNumbers == false or ReadableNumbers.format, "Wrong argument given for readableNumbers, expected false/ReadableNumbers object but received " .. typeof(ReadableNumbers))
     assert(isNumber(noYieldTime), "Wrong argument given for noYieldTime, expected number but received " .. typeof(noYieldTime))
 
     return setmetatable({
