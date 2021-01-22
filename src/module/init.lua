@@ -1,6 +1,8 @@
 local Benchmarker = {}
 Benchmarker.__index = Benchmarker
 
+wait(3) -- slows down the initial require so that the game gets time to load fully first, this allows to the benchmarks to be more accurate 
+
 local readableNumbers = require(script:WaitForChild("ReadableNumbers")).new()
 
 local RunService = game:GetService('RunService')
@@ -57,21 +59,22 @@ function Benchmarker.new(cycles, duration, showProgress, showFullInfo, ReadableN
     }, Benchmarker)
 end
 
-function Benchmarker:compare(func1, func2, funcion1AmountArgs, ...)
+function Benchmarker:compare(func1, func2, function1AmountArgs, ...)
+    function1AmountArgs = function1AmountArgs or 0
     assert(areFunctions(func1, func2), "Wrong argument given for func1/func2, expected functions but received " .. typeof(func1) .. " and " .. typeof(func2))
-    assert(isInt(funcion1AmountArgs), "Wrong argument given for funcion1AmountArgs, expected integer but received " .. typeof(func1)  )
+    assert(isInt(function1AmountArgs), "Wrong argument given for funcion1AmountArgs, expected integer but received " .. typeof(func1)  )
 
     self:print(("Performing a comparison between function1 and function2 with %s cycles and a duration of %ss"):format(self:toReadable(self.cycles, self.duration)))
-    local avg1, totalTime1 = self:getAvg(func1, unpack({...}, 1, funcion1AmountArgs) )
+    local avg1, totalTime1 = self:getAvg(func1, unpack({...}, 1, function1AmountArgs) )
     self:print(("Function1 has an average of %ss per cycle and took in total %ss"):format(self:toReadable(avg1, totalTime1)))
-    local avg2, totalTime2 = self:getAvg(func2, select((funcion1AmountArgs or 0) + 1, ...))
+    local avg2, totalTime2 = self:getAvg(func2, select(function1AmountArgs + 1, ...))
     self:print(("Function2 has an average of %ss per cycle and took in total %ss"):format(self:toReadable(avg2, totalTime2)))
     local p = getPercentage(avg1, avg2)
     print(("Function1 average cycle is %.2f%% %s than function2!"):format(p, p < 0 and "slower" or "faster"))
     
-    local totalAmount1, _, amountPerS1 = self:getCycles(func1, ...)
+    local totalAmount1, _, amountPerS1 = self:getCycles(func1, unpack({...}, 1, function1AmountArgs))
     self:print(("function1 was called %s times (%s/s)"):format(self:toReadable(totalAmount1, amountPerS1)))
-    local totalAmount2, _, amountPerS2 = self:getCycles(func2, ...)
+    local totalAmount2, _, amountPerS2 = self:getCycles(func2, select(function1AmountArgs + 1, ...))
     self:print(("function2 was called %s times (%s/s)"):format(self:toReadable(totalAmount2, amountPerS2)))
     local p2 = getPercentage( amountPerS2, amountPerS1)
     print(("Function1 has %.2f%% %s cycles/s than function2!"):format(p2, p2 < 0 and "less" or "more"))
