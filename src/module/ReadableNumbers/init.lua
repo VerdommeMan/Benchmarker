@@ -1,5 +1,5 @@
 -- @Author: VerdommeMan, see https://github.com/VerdommeMan/convert-to-human-readable-numbers for more information 
--- @Version: 1.0.2
+-- @Version: 1.0.3
 
 local Formatter = {}
 Formatter.default = {precision = 3, removeTrailingZeros = true, delimiter = " ",  scale = "SI", unit = ""}
@@ -34,14 +34,18 @@ local function isString(arg)
     return type(arg) == "string" or type(arg) == "number"
 end
 
-local function isStrings(...)
-    for _, str in ipairs({...}) do
-        if not isString(str) then
+local function areStrings(...)
+    local args = {...}
+    local n = select("#", ...)
+
+    for i = 1, n do
+        if not isString(args[i]) then
             return false
         end
     end
     return true
 end
+
 
 local function formatExceptions(number)
     if isInf(number) then
@@ -95,7 +99,7 @@ function Formatter.new(precision, removeTrailingZeros, delimiter, scale, unit)
     -- type checking
     assert(isInt(precision), "Wrong argument given for precision, expected integer but received " .. typeof(precision))
     assert(Formatter.scales[scale], "wrong argument given for scale, expected a string (SI, shortScale, longScale or a custom scale)!")
-    assert(isStrings(delimiter, unit), "Wrong argument give for scale/unit, expected string but received " .. typeof(delimiter) .. " and " .. typeof(unit))
+    assert(areStrings(delimiter, unit), "Wrong argument give for scale/unit, expected string but received " .. typeof(delimiter) .. " and " .. typeof(unit))
 
     return setmetatable({
         precision = precision,
