@@ -12,6 +12,12 @@ local config = {
 }
 
 local Benchmark = require(script:WaitForChild("Benchmark"))
+local GUI = script.gui.benchmarker:Clone()
+local GuiManager = require(script.gui.GuiManager)
+
+local guiManager = GuiManager.new(GUI)
+
+
 
 -- configFormat = {
 --     Methods = {},
@@ -20,7 +26,7 @@ local Benchmark = require(script:WaitForChild("Benchmark"))
 --     NamesOFRandom
 -- }
 
-function Benchmarker.Create(config) -- returns a benchmark
+function Benchmarker.Create(config) -- returns a Benchmark
     
 end
 
@@ -33,6 +39,14 @@ function Benchmarker.Abort() -- cancels current running benchmark and queued ben
 end
 
 function Benchmarker.Destroy()
+    
+end
+
+function Benchmarker.Show()
+    
+end
+
+function Benchmarker.Hide()
     
 end
 

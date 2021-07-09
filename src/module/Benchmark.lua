@@ -1,8 +1,9 @@
 local Benchmark = {}
 Benchmark.__index = Benchmark
 
+local Prototype = {}
 
-function Benchmark.new()
+function Prototype.new()
     local bindeable = Instance.new("BindableEvent")
     return setmetatable({Status = "queued", Finished = bindeable.Event, _Bindeable = bindeable}, Benchmark)
 end
@@ -23,4 +24,4 @@ function Benchmark:Unpauze() -- unpauzes the current benchmark
     
 end
 
-return Benchmark
+return Prototype
