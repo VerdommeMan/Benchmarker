@@ -6,6 +6,7 @@ GuiDirector.__index = GuiDirector
 -- Managers
 local WindowManager = require(script.WindowManager)
 local ResizeHandler = require(script.ResizeHandler)
+local StatsHandler = require(script.StatsHandler)
 
 local guiFolder = script.Parent
 local components = guiFolder.components
@@ -20,7 +21,7 @@ function GuiDirector.new(gui)
    local self = setmetatable({root = gui}, GuiDirector)
    self.MainWindow = WindowManager.new(self.root.Background:FindFirstChild("Window", true), self.root, true) 
    self.MinmizedWindow = WindowManager.new(self.root.Minimized.window, self.root) 
-   ResizeHandler(self.root, getComponent("StatsScaffold"))
+   ResizeHandler(self.root, StatsHandler(getComponent("StatsScaffold")))
    return self
 end
 

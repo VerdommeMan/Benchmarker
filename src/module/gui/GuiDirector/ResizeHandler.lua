@@ -22,4 +22,5 @@ return function (root, stats)
             atTop = false
         end
     end)
+    stats.Parent = background.Content.VerticalList
 end
