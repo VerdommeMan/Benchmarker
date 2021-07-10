@@ -3,16 +3,24 @@
 local GuiDirector = {}
 GuiDirector.__index = GuiDirector
 
--- local EmptyPane = script.Parent.EmptyPane:Clone()
--- local Pane = script.Parent.Pane:Clone()
-
 -- Managers
 local WindowManager = require(script.WindowManager)
+local ResizeHandler = require(script.ResizeHandler)
+
+local guiFolder = script.Parent
+local components = guiFolder.components
+
+
+local function getComponent(name)
+    return components[name]:Clone()
+end
+
 
 function GuiDirector.new(gui)
    local self = setmetatable({root = gui}, GuiDirector)
    self.MainWindow = WindowManager.new(self.root.Background:FindFirstChild("Window", true), self.root, true) 
    self.MinmizedWindow = WindowManager.new(self.root.Minimized.window, self.root) 
+   ResizeHandler(self.root, getComponent("StatsScaffold"))
    return self
 end
 
