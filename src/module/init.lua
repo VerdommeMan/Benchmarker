@@ -8,14 +8,17 @@ local config = {
     studioOnly = true,
     yieldtime = 0.1, -- seconds
     displayBasedOnContext = true, -- only display the gui in the server if its called from server an only on the client if its called from client
-    displayCoreGuis = false
+    displayCoreGuis = false,
+    defaultFullscreen = false -- decides if the gui will display by on fullscreen on creation
 }
 
 local Benchmark = require(script:WaitForChild("Benchmark"))
-local GUI = script.gui.benchmarker:Clone()
-local GuiManager = require(script.gui.GuiManager)
+local GUI = script.gui.Benchmarker:Clone()
+local GuiDirector = require(script.gui.GuiDirector)
 
-local guiManager = GuiManager.new(GUI)
+local guiDirector = GuiDirector.new(GUI)
+
+guiDirector.root.Parent = game.Players.LocalPlayer.PlayerGui
 
 
 

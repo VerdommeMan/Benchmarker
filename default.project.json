@@ -15,6 +15,12 @@
         "$path": "src/module"
       }
     },
+    "ReplicatedStorage":{
+      "$className": "ReplicatedStorage",
+      "Benchmarker":{
+        "$path": "src/module"
+      }
+    },
     "Players":{
       "$className": "Players",
       "$properties": {
