@@ -160,10 +160,13 @@ local Themes = {
         ToggleButtons = {
             Default = {
                BackgroundColor3 = C.D.Gray60,
-                TextColor3 = C.White
+                TextColor3 = C.White,
+                Text = "<b><u>$</u></b>"
             },
             Active = {
-                BackgroundColor3 = C.D.Red210
+                BackgroundColor3 = C.D.Red210,
+                TextColor3 = C.White,
+                Text = "<b>$</b>"
             }
         },
         StatusColors = {
