@@ -13,12 +13,12 @@ local config = {
 }
 
 local Benchmark = require(script:WaitForChild("Benchmark"))
-local GUI = script.gui.Benchmarker:Clone()
+
 local GuiDirector = require(script.gui.GuiDirector)
 
-local guiDirector = GuiDirector.new(GUI)
+local guiDirector = GuiDirector.new()
 
-guiDirector.root.Parent = game.Players.LocalPlayer.PlayerGui
+
 
 
 

@@ -1,9 +1,14 @@
--- Easiest way of doing Observer pattern, source of truth
-
-local Themes = require(script.Parent.gui.Theme)
-
+-- SSOT
+local TableChanged = require(script.Parent.TableChanged)
 local Data = {}
 
-Data.Theme = Themes["Dark"]
+Data.Theme = "Dark"
+Data.Benchmarks = {
+    Queue = {},
+    Waiting = {},
+    Completed = {},
+    Total = {}
+}
 
-return Data
+
+return TableChanged(Data) -- Observer pattern
