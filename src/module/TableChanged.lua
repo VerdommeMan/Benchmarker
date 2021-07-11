@@ -20,7 +20,7 @@ function __newindex(t, k ,v)
         for _, listener in ipairs(t._listeners[CHANGED]) do
             listener(v)
         end
-        t._tbl[k] = type(v) == "table" and initChanged(v) or v 
+        t._tbl[k] = k ~= "Theme" and type(v) == "table" and initChanged(v) or v -- add exception for Theme,
     end
 end
 

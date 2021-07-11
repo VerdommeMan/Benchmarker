@@ -13,12 +13,22 @@ local config = {
 }
 
 local Benchmark = require(script:WaitForChild("Benchmark"))
+local Data = require(script.Parent.Data)
 
 local GuiDirector = require(script.gui.GuiDirector)
-
 local guiDirector = GuiDirector.new()
 
 
+
+
+spawn(function()
+    wait(2)
+    Data.Benchmarks.Total:insert(Benchmark.new())
+    wait(2)
+    Data.Benchmarks.Total:insert(Benchmark.new())
+    wait(2)
+    Data.Benchmarks.Total:insert(Benchmark.new())
+end)
 
 
 
