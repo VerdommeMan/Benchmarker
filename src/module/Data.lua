@@ -1,5 +1,5 @@
 -- SSOT
-local TableChanged = require(script.Parent.TableChanged)
+local TableChanged = require(script.Parent.modules.TableChanged)
 local Themes = require(script.Parent.gui.Theme).Themes
 local Data = {}
 
@@ -12,4 +12,4 @@ Data.Benchmarks = {
 }
 
 
-return TableChanged(Data) -- Observer pattern
+return TableChanged(Data, {Theme = true}) -- Observer pattern

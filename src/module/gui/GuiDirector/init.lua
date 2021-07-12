@@ -4,7 +4,9 @@ local GuiDirector = {}
 GuiDirector.__index = GuiDirector
 
 -- Managers
+local PaneManager = require(script.PaneManager)
 local WindowManager = require(script.WindowManager)
+local PaneControlManager = require(script.PaneControlManager)
 local ResizeHandler = require(script.ResizeHandler)
 local StatsHandler = require(script.StatsHandler)
 
@@ -19,15 +21,20 @@ end
 
 
 function GuiDirector.new()
-    local self = setmetatable({root = guiFolder.Benchmarker:Clone()}, GuiDirector)
+    local self = setmetatable({root = guiFolder.Benchmarker:Clone(), panes = {}}, GuiDirector)
     local background = self.root.Background
-    self.MainWindow = WindowManager.new(background:FindFirstChild("Window", true), self.root, true) 
-    self.MinmizedWindow = WindowManager.new(self.root.Minimized.window, self.root) 
-    self.PaneHolder = background.Content.VerticalList
+    self.mainWindow = WindowManager.new(background:FindFirstChild("Window", true), self.root, true) 
+    self.minmizedWindow = WindowManager.new(self.root.Minimized.window, self.root) 
+    self.paneHolder = background.Content.VerticalList
+    self.paneControlManager = PaneControlManager.new(self.panes, self.paneHolder.Controls, getComponent("EmptyPane")) 
     ResizeHandler(self.root, StatsHandler(getComponent("StatsScaffold")))
-
-    self.Panes = {Empty = getComponent("EmptyPane")}
-    self.Panes.Empty.Parent = self.PaneHolder
+    local total = Data.Benchmarks.Total
+    
+    total:exempt()
+    total:changed(function()
+        table.insert(self.panes, PaneManager.new(getComponent("PaneScaffold"), total[total:len()], self.paneHolder))
+        self.paneControlManager:update()
+    end)
 
     wait(5)
     self.root.Parent = game.Players.LocalPlayer.PlayerGui
@@ -37,7 +44,9 @@ end
 
 
 
-function GuiDirector:Destroy()
+function GuiDirector:destroy()
+    self.paneHolder = nil
+    self.paneControlManager:destroy()
     self.root:Destroy()
 end
 

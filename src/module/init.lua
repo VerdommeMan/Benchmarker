@@ -13,7 +13,7 @@ local config = {
 }
 
 local Benchmark = require(script:WaitForChild("Benchmark"))
-local Data = require(script.Parent.Data)
+local Data = require(script.Data)
 
 local GuiDirector = require(script.gui.GuiDirector)
 local guiDirector = GuiDirector.new()

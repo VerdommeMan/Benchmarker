@@ -5,13 +5,12 @@ return function(stats)
 	local header = stats.Header
 	local open = stats.Table.Visible
 
-	header.InputBegan:Connect(function(input) 
+	header.InputBegan:Connect(function(input) -- #todo connection delete when transformed into an actual manager 
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			open = not open
 			TweenService:Create(header.Arrow, tInfo, {Rotation = open and 90 or 0}):Play()
 			stats.Table.Visible = open
 		end
 	end)
-	print("stat handled")
 	return stats
 end

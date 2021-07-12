@@ -5,8 +5,6 @@ local Data = require(script.Parent.Parent.Parent.Data)
 
 local default, active, theme, defaultPattern, activePattern
 
-ToggleManager.setTheme()
-
 local function shallowCopy(tbl)
 	local newTbl = {}
 	
@@ -40,7 +38,7 @@ end
 
 function ToggleManager.new(toggle, table)
     local self = setmetatable({toggle = toggle, table = table, btns = getChildrenIsA(toggle, "TextButton")}, ToggleManager)
-    self:render(toggle.Cycles)
+    self:renderBtns(toggle.Cycles)
     return self
 end
 
@@ -53,7 +51,6 @@ function ToggleManager:initBtns()
                 -- tbl.Visible = true
                 -- -- stupid bug, doesnt update the height, forcing update now
                 -- tbl.Size = UDim2.new(1, -7,1, 0)
-                print("make ", self.activeMethod.Name, " invisible and ", method.Name, " visible")
                 self:renderBtns(method)
             end
         end)
@@ -78,6 +75,10 @@ end
 
 function ToggleManager.setTheme()
     theme = Data.Theme
-    default , active = shallowCopy(theme.Default), shallowCopy(theme.Active)
+    default , active = shallowCopy(theme.ToggleButtons.Default), shallowCopy(theme.ToggleButtons.Active)
     defaultPattern, activePattern = default.Text, active.Text
 end
+
+ToggleManager.setTheme()
+
+return ToggleManager

@@ -1,5 +1,7 @@
 local Benchmark = {}
+
 Benchmark.__index = Benchmark
+Benchmark.Methods = {"Cycles", "Mean"} -- fallback
 
 local Prototype = {}
 

@@ -3,9 +3,9 @@
 local CHANGED = {} -- unique key
 local mod = {}
 
-local function initChanged(tbl)
+local function initChanged(tbl, childExecptions)
     for k,v in pairs(tbl) do
-        if type(v) == "table" then
+        if type(v) == "table" and not (childExecptions or {})[k] then
            tbl[k] = initChanged(v)
         end
     end
@@ -14,17 +14,18 @@ end
 
 function __newindex(t, k ,v)
     if t._tbl[k] ~= v then
+        t._tbl[k] = t._exempt == nil and type(v) == "table" and initChanged(v) or v
+          
         for _, listener in ipairs(t._listeners[k] or {}) do
             listener(v)
         end
         for _, listener in ipairs(t._listeners[CHANGED]) do
             listener(v)
         end
-        t._tbl[k] = k ~= "Theme" and type(v) == "table" and initChanged(v) or v -- add exception for Theme,
     end
 end
 
-function mod:KeyChanged(key, callback)
+function mod:keyChanged(key, callback)
     if not self._listeners[key] then
         self._listeners[key] = {}
     end
@@ -49,8 +50,13 @@ function mod:remove(i) -- cant use table.remove, due to rawset
     end
 end
 
-function mod:Changed(callback)
+function mod:changed(callback)
     table.insert(self._listeners[CHANGED], callback)
+end
+
+-- This method prevents the added children that are tables from being transformed into this new format
+function mod:exempt() 
+    self._exempt = true
 end
 
 return initChanged
