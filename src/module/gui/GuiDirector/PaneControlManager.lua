@@ -42,12 +42,10 @@ end
 
 function PaneControlManager:initButtons()
     self.maid.previous = self.controls.Previous.Activated:Connect(function()
-        print("prev")
         self.pos = math.max(1, self.pos - 1)
         self:update()
     end)
     self.maid.next = self.controls.Next.Activated:Connect(function()        
-        print("next")
         self.pos = math.min(#self.panes, self.pos + 1)
         self:update()
     end)

@@ -9,12 +9,14 @@ local CalcStats = require(module.CalcStatistics)
 local Column = Data.Theme.Column
 local TableScaffold = guiFolder.components.TableScaffold
 
-local function createCell(order, text)
+local function createCell(order, text, isHeader)
     local lbl = Instance.new("TextLabel")
+    lbl.BorderSizePixel = 0
     lbl.BackgroundColor3 = order % 4 == 0 and Column.Primary or Column.Secondary
     lbl.AutomaticSize = Enum.AutomaticSize.X
     lbl.Size = UDim2.fromOffset(50, 25)
-    lbl.Text = text
+    lbl.RichText = isHeader
+    lbl.Text = isHeader and "<b>"..text.."</b>" or text
     lbl.TextColor3 = Column.TextColor3
     lbl.LayoutOrder = order
     return lbl
@@ -22,6 +24,7 @@ end
 
 local function createBorder(order)
     local frame = Instance.new("Frame")
+    frame.BorderSizePixel = 0
     frame.BackgroundColor3 = Column.Border
     frame.AutomaticSize = Enum.AutomaticSize.X
     frame.Size = UDim2.fromOffset(0, 1)
@@ -42,7 +45,7 @@ local function createColumn(config, parent)
 
     local order = 0
     for _, nr in ipairs(config) do
-        createCell(order, nr).Parent = frame
+        createCell(order, nr, parent).Parent = frame
         order += 1
         if nr ~= #config then
             createBorder(order).Parent = frame
@@ -52,9 +55,10 @@ local function createColumn(config, parent)
     return frame
 end
 
-function TableManager.new(benchmark, method)
+function TableManager.new(benchmark, method, tableHolder)
     local self = setmetatable({table = TableScaffold:Clone(), benchmark = benchmark, method = method}, TableManager)
     self.table.Name = method
+    self.table.Parent = tableHolder
     createColumn(CalcStats.order, self.table.Header)
     return self
 end

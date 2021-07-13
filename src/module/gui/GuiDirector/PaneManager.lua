@@ -6,13 +6,12 @@ local TableManager  = require(script.Parent.TableManager)
 
 function PaneManager.new(pane, benchmark)
     local self = setmetatable({pane = pane, benchmark = benchmark, Tables = {}}, PaneManager)
-    local Table = self.pane.Info.Table
 
     for _, method in ipairs(benchmark.Methods) do 
-        table.insert(self.Tables, TableManager.new(benchmark, method))
+        table.insert(self.Tables, TableManager.new(benchmark, method, pane.Info.Table))
     end
 
-    self.Toggle = ToggleManager.new(self.pane.Info.Selector.Toggle, Table)
+    self.Toggle = ToggleManager.new(pane, benchmark.Methods)
     
     return self
 end

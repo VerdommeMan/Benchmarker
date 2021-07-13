@@ -161,12 +161,14 @@ local Themes = {
             Default = {
                BackgroundColor3 = C.D.Gray60,
                 TextColor3 = C.White,
-                Text = "<b><u>$</u></b>"
+                TextYAlignment = Enum.TextYAlignment.Center,
+                Text = "<b>$</b>"
             },
             Active = {
                 BackgroundColor3 = C.D.Red210,
                 TextColor3 = C.White,
-                Text = "<b>$</b>"
+                Text = "<b><u>$</u></b>",
+                TextYAlignment = Enum.TextYAlignment.Top
             }
         },
         StatusColors = {

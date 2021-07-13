@@ -1,5 +1,5 @@
 local Stats = {}
-Stats.order = {"mean", "std", "min", "25%", "50%", "75%", "max"}
+Stats.order = {"Name","mean", "std", "min", "25%", "50%", "75%", "max"}
 
 function Stats.calc(arr)
     table.sort(arr)  
@@ -48,6 +48,10 @@ end
 
 Stats["75%"] = function(arr)
     Stats.percentile(arr, 0.75)
+end
+
+function Stats.Name(arr)
+    return arr.Name
 end
 
 return Stats
