@@ -14,7 +14,7 @@
 			<token name="AutomaticSize">2</token>
 			<Color3 name="BackgroundColor3">
 				<R>1</R>
-				<G>1</G
+				<G>1</G>
 				<B>1</B>
 			</Color3>
 			<float name="BackgroundTransparency">1</float>

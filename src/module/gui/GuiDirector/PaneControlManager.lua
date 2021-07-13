@@ -3,17 +3,20 @@ PaneControlManager.__index = PaneControlManager
 
 local Maid = require(script.Parent.Parent.Parent.modules.Maid)
 
-function PaneControlManager.new(panes, controls, emptyPane)
+function PaneControlManager.new(panes, controls)
     local self = setmetatable({
         panes = panes, 
-        controls = controls, 
-        emptyPane = emptyPane, 
+        controls = controls,  
         paneHolder = controls.Parent,
         maid = Maid.new(), 
-        pos = 1
+        pos = 0
     }, PaneControlManager)
 
-    self.maid:GiveTask(self.emptyPane)
+    local emptyPane = self.panes[self.pos]
+    self.currentPane = emptyPane
+    emptyPane.pane.Parent = self.paneHolder
+
+    self.maid:GiveTask(emptyPane.pane)
     self:initButtons()
     return self
 end
@@ -25,19 +28,15 @@ local function setButtonState(btn: TextButton, enabled)
 end
 
 function PaneControlManager:update()
-    if #self.panes == 0 then
-        self.currentPane = {pane = self.emptyPane} -- follows contract
-        self.emptyPane.Parent = self.paneHolder
-        setButtonState(self.controls.Previous, false)
-        setButtonState(self.controls.Next, false)
-        return
-    elseif self.currentPane ~= self.panes[self.pos] then
-        print("unparent", self.currentPane)
+    if self.pos == 0 and #self.panes > 0 then
+        self.pos = 1
+    end
+    if self.currentPane ~= self.panes[self.pos] then
         self.currentPane.pane.Parent = nil
         self.currentPane = self.panes[self.pos]
         self.currentPane.pane.Parent = self.paneHolder
     end
-    setButtonState(self.controls.Previous, self.pos ~= 1)
+    setButtonState(self.controls.Previous, self.pos > 1)
     setButtonState(self.controls.Next, self.pos ~= #self.panes)
 end
 

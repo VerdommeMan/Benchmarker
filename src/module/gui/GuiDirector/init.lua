@@ -21,12 +21,12 @@ end
 
 
 function GuiDirector.new()
-    local self = setmetatable({root = guiFolder.Benchmarker:Clone(), panes = {}}, GuiDirector)
+    local self = setmetatable({root = guiFolder.Benchmarker:Clone(), panes = {[0] = {pane = getComponent("EmptyPane")}}}, GuiDirector)
     local background = self.root.Background
     self.mainWindow = WindowManager.new(background:FindFirstChild("Window", true), self.root, true) 
     self.minmizedWindow = WindowManager.new(self.root.Minimized.window, self.root) 
     self.paneHolder = background.Content.VerticalList
-    self.paneControlManager = PaneControlManager.new(self.panes, self.paneHolder.Controls, getComponent("EmptyPane")) 
+    self.paneControlManager = PaneControlManager.new(self.panes, self.paneHolder.Controls) 
     ResizeHandler(self.root, StatsHandler(getComponent("StatsScaffold")))
     local total = Data.Benchmarks.Total
     
