@@ -15,7 +15,7 @@ local config = {
 
 local Benchmark = require(script:WaitForChild("Benchmark"))
 local Data = require(script.Data)
-
+local benchmarks = Data.Benchmarks
 local GuiDirector = require(script.gui.GuiDirector)
 local guiDirector = GuiDirector.new()
 
@@ -32,6 +32,10 @@ spawn(function()
 end)
 
 
+-- Benchmark specific stats: time, duration, cycles, status wanna display
+-- Benchmark general stats: RAM , FPS
+
+
 
 -- configFormat = {
 --     Methods = {}, {} or nil denotes all methods, {"specfic"} only does that method
@@ -41,27 +45,34 @@ end)
 -- }
 
 function Benchmarker.Create(config) -- returns a Benchmark
-    
+   return Benchmark.new(config) 
 end
 
-function Benchmarker.StartAll() -- starts all the queued benchmarks
-    
+function Benchmarker.StartAll() -- starts all the waiting benchmarks
+    for _, benchmark in ipairs(benchmarks.Waiting._tbl) do
+        benchmark:Start()
+    end
 end
 
 function Benchmarker.Abort() -- cancels current running benchmark and queued benchmarks
-    
+    if benchmarks.CurrentBenchmark then
+        benchmarks.CurrentBenchmark:Cancel()        
+    end
+    for _, benchmark in ipairs(benchmarks.Queue._tbl) do
+        benchmark:Cancel()
+    end
 end
 
 function Benchmarker.Destroy()
-    
+    guiDirector:destroy()    
 end
 
 function Benchmarker.Show()
-    
+    guiDirector:show()
 end
 
 function Benchmarker.Hide()
-    
+    guiDirector:hide()
 end
 
 function Benchmarker.ProfileBegin(label)

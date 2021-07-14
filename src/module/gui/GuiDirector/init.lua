@@ -46,6 +46,14 @@ function GuiDirector:_setVersion()
     self.root.Background.Version.Text = "V" .. Data.Version
 end
 
+function GuiDirector:show()
+    self.root.Enabled = true
+end
+
+function GuiDirector:hide()
+    self.root.Enabled = false
+end
+
 function GuiDirector:destroy()
     self.paneHolder = nil
     self.paneControlManager:destroy()

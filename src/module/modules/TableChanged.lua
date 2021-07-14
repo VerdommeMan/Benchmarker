@@ -40,14 +40,24 @@ function mod:insert(v, i) -- cant use table.insert, due to rawset
    self[i or #self._tbl + 1] = v
 end
 
+function mod:find(val)
+    for k, v in ipairs(self._tbl) do
+        if v == val then
+            return k
+        end
+    end
+end
+
 function mod:remove(i) -- cant use table.remove, due to rawset
     local len = #self._tbl
+    local old = self[i]
     self[i] = nil -- only trigger once
     if i < len then -- shift tbl
         for j = i, len do
             self._tbl[j] = self._tbl[j+1]  
         end
     end
+    return old
 end
 
 function mod:changed(callback)
