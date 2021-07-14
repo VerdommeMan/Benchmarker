@@ -22,7 +22,9 @@ function Prototype.new(config) -- #todo get stuff from config like methods
         CurrentMethod = nil,
         CurrentFunction = nil,
         TotalCompleted = 0,
-        Total = nil
+        Total = nil,
+        Time = 0,
+        _exempt = true -- prevent TableChanged from mangling this Class
     }, Benchmark)
 end
 

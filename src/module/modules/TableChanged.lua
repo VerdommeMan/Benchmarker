@@ -57,6 +57,7 @@ end
 -- This method prevents the added children that are tables from being transformed into this new format
 function mod:exempt() 
     self._exempt = true
+    return self
 end
 
 return initChanged

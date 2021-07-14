@@ -23,6 +23,7 @@ end
 function GuiDirector.new()
     local self = setmetatable({root = guiFolder.Benchmarker:Clone(), panes = {[0] = {pane = getComponent("EmptyPane")}}}, GuiDirector)
     local background = self.root.Background
+    self:_setVersion()
     self.mainWindow = WindowManager.new(background:FindFirstChild("Window", true), self.root, true) 
     self.minmizedWindow = WindowManager.new(self.root.Minimized.window, self.root) 
     self.paneHolder = background.Content.VerticalList
@@ -30,8 +31,7 @@ function GuiDirector.new()
     ResizeHandler(self.root, StatsHandler(getComponent("StatsScaffold")))
     local total = Data.Benchmarks.Total
     
-    total:exempt()
-    total:changed(function()
+    total:exempt():changed(function()
         table.insert(self.panes, PaneManager.new(getComponent("PaneScaffold"), total[total:len()], self.paneHolder))
         self.paneControlManager:update()
     end)
@@ -42,7 +42,9 @@ function GuiDirector.new()
    return self
 end
 
-
+function GuiDirector:_setVersion()
+    self.root.Background.Version.Text = "V" .. Data.Version
+end
 
 function GuiDirector:destroy()
     self.paneHolder = nil

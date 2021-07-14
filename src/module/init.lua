@@ -5,6 +5,7 @@ local Benchmarker = {}
 Benchmarker.__index = Benchmarker
 
 local config = {
+    theme = "Dark",
     studioOnly = true,
     yieldtime = 0.1, -- seconds
     displayBasedOnContext = true, -- only display the gui in the server if its called from server an only on the client if its called from client
@@ -33,9 +34,9 @@ end)
 
 
 -- configFormat = {
---     Methods = {},
---     Duration = 5,
---     Cycles = 1e9,
+--     Methods = {}, {} or nil denotes all methods, {"specfic"} only does that method
+--     Duration = 5, -- duration for Mean method
+--     Cycles = 1e9, -- Denotes how many cycles it will run for the
 --     NamesOFRandom
 -- }
 
