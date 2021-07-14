@@ -1,11 +1,47 @@
 local Benchmark = {}
 
 Benchmark.__index = Benchmark
-Benchmark.Methods = {"Cycles", "Mean"} -- fallback
+Benchmark.Methods = {"Cycles", "Duration"} -- fallback
 Benchmark.Status = {Queued = "Queued", Waiting = "Waiting", Running = "Running", Pauzed = "Pauzed", Completed = "Completed"}
+Benchmark.ReservedKeywords = {"Duration", "Cycles", "Methods"}
 
+local TableChanged = require(script.Parent.modules.TableChanged)
 local Data = require(script.Parent.Data)
 local benchmarks = Data.Benchmarks
+
+
+local function verifyMethods(methods)
+    if methods ~= nil and #methods > 0 then
+        for _, method in ipairs(methods) do
+            if not table.find(Benchmark.Methods, method) then
+                error(method .. " is an unkown method")
+            end
+        end
+        return methods
+    end
+end
+
+local function removeReservedKeywords(config)
+    for _, keyword in ipairs(Benchmark.ReservedKeywords) do
+        config[keyword] = nil        
+    end
+    return config
+end
+
+local function countDict(dict)
+    local count = 0
+    for _ in pairs(dict) do
+        count +=1
+    end
+    return count
+end
+
+local function getTemplateResults(methods)
+    local results = {}
+    for _, method in ipairs(methods) do
+        results[method] = TableChanged({})
+    end
+end
 
 local Prototype = {}
 
@@ -14,6 +50,10 @@ function Prototype.new(config) -- #todo get stuff from config like methods
     local bindeable2 = Instance.new("BindableEvent") --#todo maid
     local bindeable3 = Instance.new("BindableEvent") --#todo maid
     local self = setmetatable({
+        Methods = verifyMethods(config.Methods),
+        Cycles = config.Cycles or 1000,
+        Duration = config.Duration or 1,
+        Functions = removeReservedKeywords(config),
         Status = Benchmark.Status.Waiting,
         StatusChanged = bindeable2.Event,
         _StatusBindeable = bindeable2,  
@@ -25,11 +65,12 @@ function Prototype.new(config) -- #todo get stuff from config like methods
         CurrentMethod = nil,
         CurrentFunction = nil,
         TotalCompleted = 0,
-        Total = nil,
         Time = 0,
         _exempt = true -- prevent TableChanged from mangling this Class
     }, Benchmark)
 
+    self.Total = countDict(self.Functions) * #self.Methods
+    self.Results = getTemplateResults(self.Methods)
     benchmarks.Total:insert(self)
     benchmarks.Waiting:insert(self)
 
@@ -82,6 +123,11 @@ end
 function Benchmark:_SetStatus(status)
     self.Status = status
     self._StatusBindeable:Fire(status)
+end
+
+function Benchmark:_SetProgress(progress)
+    self.Progress = progress
+    self._ProgressBindeable:fire(progress)
 end
 
  return Prototype

@@ -24,11 +24,11 @@ local guiDirector = GuiDirector.new()
 
 spawn(function()
     wait(2)
-    Data.Benchmarks.Total:insert(Benchmark.new())
+    Data.Benchmarks.Total:insert(Benchmark.new({}))
     wait(2)
-    Data.Benchmarks.Total:insert(Benchmark.new())
+    Data.Benchmarks.Total:insert(Benchmark.new({}))
     wait(2)
-    Data.Benchmarks.Total:insert(Benchmark.new())
+    Data.Benchmarks.Total:insert(Benchmark.new({}))
 end)
 
 
