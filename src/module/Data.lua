@@ -5,6 +5,7 @@ local Data = {}
 
 Data.Theme = Themes["Dark"]
 Data.Benchmarks = {
+    Running = nil,
     Queue = {},
     Waiting = {},
     Completed = {},

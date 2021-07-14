@@ -82,7 +82,7 @@ end
 
 function ToggleManager:updateTheme()
     ToggleManager.setTheme()
-    self:renderBtns(self.activeBtn)
+    self:_renderBtns(self.activeBtn)
 end
 
 function ToggleManager.setTheme()

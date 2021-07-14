@@ -1,7 +1,9 @@
 local PaneControlManager = {}
 PaneControlManager.__index = PaneControlManager
 
-local Maid = require(script.Parent.Parent.Parent.modules.Maid)
+local root = script.Parent.Parent.Parent 
+local Maid = require(root.modules.Maid)
+local Data = require(root.Data)
 
 function PaneControlManager.new(panes, controls)
     local self = setmetatable({
@@ -17,7 +19,7 @@ function PaneControlManager.new(panes, controls)
     emptyPane.pane.Parent = self.paneHolder
 
     self.maid:GiveTask(emptyPane.pane)
-    self:initButtons()
+    self:_initButtons()
     return self
 end
 
@@ -35,12 +37,16 @@ function PaneControlManager:update()
         self.currentPane.pane.Parent = nil
         self.currentPane = self.panes[self.pos]
         self.currentPane.pane.Parent = self.paneHolder
+        self.maid.StatusChanged = self.currentPane.benchmark.StatusChanged:Connect(function()
+            self:updateStartButton()
+        end)
     end
     setButtonState(self.controls.Previous, self.pos > 1)
     setButtonState(self.controls.Next, self.pos ~= #self.panes)
+    self:updateStartButton()
 end
 
-function PaneControlManager:initButtons()
+function PaneControlManager:_initButtons()
     self.maid.previous = self.controls.Previous.Activated:Connect(function()
         self.pos = math.max(1, self.pos - 1)
         self:update()
@@ -50,13 +56,42 @@ function PaneControlManager:initButtons()
         self:update()
     end)
     self.maid.start = self.controls.Start.Activated:Connect(function()
-        self:startButton()
+        self:_startButton()
     end)
     self:update()
 end
 
-function PaneControlManager:startButton()
-    
+function PaneControlManager:_startButton()
+    local benchmark = self.currentPane.benchmark
+    if benchmark.Status == "Waiting" then
+        benchmark:Start()
+    elseif benchmark.Status == "Running" then
+        benchmark:Pauze()
+    elseif benchmark.Status == "Pauzed" then
+        benchmark:Unpauze()
+    end 
+end
+
+function PaneControlManager:updateStartButton()
+    local benchmark = self.currentPane.benchmark
+    local currentBenchmark = Data.Benchmarks.CurrentBenchmark 
+    local start = self.controls.Start
+    local isActive = start.Active
+
+    if benchmark and benchmark.Status ~= "Completed" and (not currentBenchmark or currentBenchmark == benchmark) then
+        if benchmark.Status == "Running" then
+            start.Text = "PAUZE"
+        elseif benchmark.Status == "Pauzed" then
+            start.Text = "UNPAUZE"
+        else
+            start.Text = "START"
+        end
+        if not isActive then
+            setButtonState(start, true) 
+        end
+    elseif isActive then
+        setButtonState(start, false)
+    end
 end
 
 function PaneControlManager:destroy()
