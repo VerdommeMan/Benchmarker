@@ -21,7 +21,7 @@ end
 
 
 function GuiDirector.new()
-    local self = setmetatable({root = guiFolder.Benchmarker:Clone(), panes = {[0] = {pane = getComponent("EmptyPane")}}}, GuiDirector)
+    local self = setmetatable({root = guiFolder.benchmarker:Clone(), panes = {[0] = {pane = getComponent("EmptyPane")}}}, GuiDirector)
     local background = self.root.Background
     self:_setVersion()
     self.mainWindow = WindowManager.new(background:FindFirstChild("Window", true), self.root, true) 

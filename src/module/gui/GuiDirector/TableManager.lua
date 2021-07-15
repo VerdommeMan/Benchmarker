@@ -59,10 +59,16 @@ function TableManager.new(benchmark, method, tableHolder)
     local self = setmetatable({table = TableScaffold:Clone(), benchmark = benchmark, method = method}, TableManager)
     self.table.Name = method
     self.table.Parent = tableHolder
-    createColumn(CalcStats.order, self.table.Header)
+    createColumn(CalcStats.order[method], self.table.Header)
+    self:_initListeners()
     return self
 end
 
+function TableManager:_initListeners()
+    self.benchmark.Results[self.method]:changed(function(val)
+        createColumn(CalcStats.calc(val[val:len()])).Parent = self.table.Body
+    end)
+end
 function TableManager:destroy()
     self.table:destroy()
     self.table = nil

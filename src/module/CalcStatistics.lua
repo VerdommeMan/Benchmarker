@@ -1,11 +1,14 @@
 local Stats = {}
-Stats.order = {"Name","mean", "std", "min", "25%", "50%", "75%", "max"}
+Stats.order = {
+    Cycles = {"Name","mean", "std", "min", "25%", "50%", "75%", "max"},
+    Duration = {"Name", "cycles"}
+}
 
-function Stats.calc(arr)
+function Stats.calc(arr, method)
     table.sort(arr)  
     local results = {}
-    for _, stat in ipairs(Stats.order) do
-        results[stat] = Stats[stat](arr)
+    for i, stat in ipairs(Stats.order[method]) do
+        results[i] = Stats[stat](arr)
     end
     return results
 end
@@ -52,6 +55,10 @@ end
 
 function Stats.Name(arr)
     return arr.Name
+end
+
+function Stats.cycles(arr)
+    return arr[1]
 end
 
 return Stats

@@ -41,6 +41,7 @@ local function getTemplateResults(methods)
     for _, method in ipairs(methods) do
         results[method] = TableChanged({})
     end
+    return results
 end
 
 local Prototype = {}
