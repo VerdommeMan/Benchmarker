@@ -14,7 +14,7 @@ end
 
 function __newindex(t, k ,v)
     if t._tbl[k] ~= v then
-        t._tbl[k] = t._exempt == nil and type(v) == "table" and initChanged(v) or v
+        t._tbl[k] = (not t._exempt) and type(v) == "table" and (not v._exempt)  and initChanged(v) or v
           
         for _, listener in ipairs(t._listeners[k] or {}) do
             listener(v)

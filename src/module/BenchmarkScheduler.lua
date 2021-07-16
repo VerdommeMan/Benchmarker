@@ -5,13 +5,17 @@ local benchmarks = Data.Benchmarks
 local queue = benchmarks.Queue
 
 queue:exempt():changed(function()
+    print("Queue changed")
     if not benchmarks.CurrentBenchmark and queue:len() > 0 then
         benchmarks.CurrentBenchmark = table.remove(queue._tbl, 1)
     end
 end)
 
 benchmarks:keyChanged("CurrentBenchmark", function(newVal)
+    print("Current Benchmark changed")
    if newVal == nil and queue:len() > 0 then
         benchmarks.CurrentBenchmark = table.remove(queue._tbl, 1)     
    end 
 end)
+
+return true

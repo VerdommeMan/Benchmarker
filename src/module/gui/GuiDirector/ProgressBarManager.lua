@@ -23,7 +23,7 @@ end
 
 function ProgressBarManager:setLabel(method, func, progress)
     self._bar.base.SubTotal.Text = string.format("%s %s: %2i%%", method, func, progress * 100)
-    self._setProgress(progress)
+    self:_setProgress(progress)
 end
 
 return ProgressBarManager

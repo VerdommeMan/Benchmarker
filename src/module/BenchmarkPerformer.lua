@@ -6,10 +6,14 @@ local Data = require(script.Parent.Data)
 local benchmarks = Data.Benchmarks
 
 benchmarks:keyChanged("CurrentBenchmark", function(benchmark)
-    if benchmark ~= nil then
-        benchmark:_setStatus("Running")
-        BenchmarkPerformer.perform(benchmark)        
-    end
+    coroutine.wrap(function()
+        print("benchmark ", benchmark)
+        if benchmark ~= nil then
+            benchmark:_SetStatus("Running")
+            print("called perform")
+            BenchmarkPerformer.perform(benchmark)        
+        end
+    end)()
 end)
 
 function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and diagnostics
@@ -18,10 +22,14 @@ function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and dia
        
        for _, method in ipairs(benchmark.Methods) do
             benchmark.CurrentMethod = method
-            benchmark.Results[key]:insert(BenchmarkPerformer["Calc" .. method](benchmark, func)) 
+            benchmark.Results[method]:insert(BenchmarkPerformer["Calc" .. method](benchmark, func))
+            print("Benchmark performed for ", key , func) 
             benchmark.TotalCompleted += 1   
        end
     end
+    benchmark:_SetStatus("Completed")
+    benchmarks.CurrentBenchmark = nil
+    benchmarks.Completed:insert(benchmark)
 end
 
 function BenchmarkPerformer.CalcCycles(benchmark, func) -- Calc Cyles for a given duration
@@ -39,7 +47,7 @@ function BenchmarkPerformer.CalcCycles(benchmark, func) -- Calc Cyles for a give
         end
         RunService.Heartbeat:Wait()
         totalTime += subTime
-        benchmark:_setProgress(totalTime / duration)
+        benchmark:_SetProgress(totalTime / duration)
     end
 
     return {amount}
@@ -63,7 +71,7 @@ function BenchmarkPerformer.CalcDuration(benchmark, func) -- calc the duration f
         end
         RunService.Heartbeat:Wait()
         totalTime += subTime
-        benchmark:_setProgress(amount / cycles)
+        benchmark:_SetProgress(amount / cycles)
     end
     
     return results

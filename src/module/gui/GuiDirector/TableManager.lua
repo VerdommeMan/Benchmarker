@@ -65,8 +65,10 @@ function TableManager.new(benchmark, method, tableHolder)
 end
 
 function TableManager:_initListeners()
-    self.benchmark.Results[self.method]:changed(function(val)
-        createColumn(CalcStats.calc(val[val:len()])).Parent = self.table.Body
+    local result = self.benchmark.Results[self.method]
+    result:changed(function()
+        print("change fired")
+        createColumn(CalcStats.calc(result[result:len()], self.method)).Parent = self.table.Body
     end)
 end
 function TableManager:destroy()

@@ -19,18 +19,22 @@ local benchmarks = Data.Benchmarks
 local GuiDirector = require(script.gui.GuiDirector)
 local guiDirector = GuiDirector.new()
 
+require(script.BenchmarkScheduler)
+require(script.BenchmarkPerformer)
 
 
 
 spawn(function()
     wait(2)
     Benchmarker.Create({
+        Duration = 10,
+        Cycles = 5000,
         tester = function()
             for i = 1, 100 do
                 
             end
         end
-    })
+    }):Start()
 --     wait(2)
 --     Data.Benchmarks.Total:insert(Benchmark.new({}))
 --     wait(2)

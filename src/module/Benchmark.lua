@@ -80,6 +80,7 @@ end
 
 function Benchmark:Start() -- starts the benchmark, if one is already started, it will wait until the previous to start
     if self.Status == Benchmark.Status.Waiting then
+        print(benchmarks.Waiting)
         benchmarks.Waiting:remove(benchmarks.Waiting:find(self))
         benchmarks.Queue:insert(self)
         self:_SetStatus(Benchmark.Status.Queued)
