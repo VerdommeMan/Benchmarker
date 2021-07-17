@@ -28,9 +28,14 @@ spawn(function()
     wait(2)
     Benchmarker.Create({
         Duration = 10,
-        Cycles = 5000,
+        Cycles = 1e6,
         tester = function()
             for i = 1, 100 do
+                
+            end
+        end,
+        framer = function()
+            for i in ipairs(table.create(100, true)) do
                 
             end
         end

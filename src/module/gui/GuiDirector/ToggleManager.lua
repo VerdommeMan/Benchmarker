@@ -65,7 +65,7 @@ end
 
 function ToggleManager:_createBtns(methods)
     for i, method in ipairs(methods) do
-        self.btns[i] = createButton(method, self.toggle)
+        self.btns[i] = createButton(method.Name, self.toggle)
     end
 end
 

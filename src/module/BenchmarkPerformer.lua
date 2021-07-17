@@ -22,7 +22,7 @@ function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and dia
        
        for _, method in ipairs(benchmark.Methods) do
             benchmark.CurrentMethod = method
-            benchmark.Results[method]:insert(BenchmarkPerformer["Calc" .. method](benchmark, func))
+            benchmark.Results[method]:insert(BenchmarkPerformer["Calc" .. method.Name](benchmark, func))
             print("Benchmark performed for ", key , func) 
             benchmark.TotalCompleted += 1   
        end
@@ -50,13 +50,13 @@ function BenchmarkPerformer.CalcCycles(benchmark, func) -- Calc Cyles for a give
         benchmark:_SetProgress(totalTime / duration)
     end
 
-    return {amount}
+    return {amount, Name = benchmark.CurrentFunction}
 end
 
 function BenchmarkPerformer.CalcDuration(benchmark, func) -- calc the duration for the a given amount of cycles
     local amount = 0
     local totalTime = 0
-    local results = {}
+    local results = {Name = benchmark.CurrentFunction}
     local cycles = benchmark.Cycles
 
     while amount < cycles do

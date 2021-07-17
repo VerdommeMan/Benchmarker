@@ -1,14 +1,11 @@
+-- Each column in the Methods needs function defined for it
 local Stats = {}
-Stats.order = {
-    Cycles = {"Name","mean", "std", "min", "25%", "50%", "75%", "max"},
-    Duration = {"Name", "cycles"}
-}
 
 function Stats.calc(arr, method)
     table.sort(arr)  
     local results = {}
-    for i, stat in ipairs(Stats.order[method]) do
-        results[i] = Stats[stat](arr)
+    for i, stat in ipairs(method.Columns) do
+        results[i] = i ~= 1 and method.Formatter:format(Stats[stat](arr)) or Stats[stat](arr) 
     end
     return results
 end
@@ -42,15 +39,15 @@ function Stats.percentile(arr, percent)
 end
 
 Stats["25%"] = function(arr)
-    Stats.percentile(arr, 0.25)
+    return Stats.percentile(arr, 0.25)
 end
 
 Stats["50%"] = function(arr)
-    Stats.percentile(arr, 0.5)
+    return Stats.percentile(arr, 0.5)
 end
 
 Stats["75%"] = function(arr)
-    Stats.percentile(arr, 0.75)
+    return Stats.percentile(arr, 0.75)
 end
 
 function Stats.Name(arr)

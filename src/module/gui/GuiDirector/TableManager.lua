@@ -11,10 +11,11 @@ local TableScaffold = guiFolder.components.TableScaffold
 
 local function createCell(order, text, isHeader)
     local lbl = Instance.new("TextLabel")
+    lbl.Name = "Cell"
     lbl.BorderSizePixel = 0
     lbl.BackgroundColor3 = order % 4 == 0 and Column.Primary or Column.Secondary
     lbl.AutomaticSize = Enum.AutomaticSize.X
-    lbl.Size = UDim2.fromOffset(50, 25)
+    lbl.Size = UDim2.fromOffset(75, 25)
     lbl.RichText = isHeader
     lbl.Text = isHeader and "<b>"..text.."</b>" or text
     lbl.TextColor3 = Column.TextColor3
@@ -24,6 +25,7 @@ end
 
 local function createBorder(order)
     local frame = Instance.new("Frame")
+    frame.Name = "Border"
     frame.BorderSizePixel = 0
     frame.BackgroundColor3 = Column.Border
     frame.AutomaticSize = Enum.AutomaticSize.X
@@ -36,7 +38,11 @@ local function createColumnHolder()
     local frame = Instance.new("Frame")
     frame.BackgroundTransparency = 1
     frame.AutomaticSize = Enum.AutomaticSize.Y
-    frame.Size = UDim2.fromOffset(70, 0)
+    frame.Size = UDim2.fromOffset(75, 0)
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.FillDirection = Enum.FillDirection.Vertical
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Parent = frame
     return frame
 end
 
@@ -57,18 +63,19 @@ end
 
 function TableManager.new(benchmark, method, tableHolder)
     local self = setmetatable({table = TableScaffold:Clone(), benchmark = benchmark, method = method}, TableManager)
-    self.table.Name = method
+    self.table.Name = method.Name
     self.table.Parent = tableHolder
-    createColumn(CalcStats.order[method], self.table.Header)
+    createColumn(method.Columns, self.table.Header)
     self:_initListeners()
     return self
 end
 
 function TableManager:_initListeners()
     local result = self.benchmark.Results[self.method]
-    result:changed(function()
+    result:exempt():changed(function()
         print("change fired")
-        createColumn(CalcStats.calc(result[result:len()], self.method)).Parent = self.table.Body
+        local vals = CalcStats.calc(result[result:len()], self.method) 
+        createColumn(vals).Parent = self.table.Body
     end)
 end
 function TableManager:destroy()

@@ -1,24 +1,34 @@
 local Benchmark = {}
 
 Benchmark.__index = Benchmark
-Benchmark.Methods = {"Cycles", "Duration"} -- fallback
 Benchmark.Status = {Queued = "Queued", Waiting = "Waiting", Running = "Running", Pauzed = "Pauzed", Completed = "Completed"}
-Benchmark.ReservedKeywords = {"Duration", "Cycles", "Methods"}
+Benchmark.ReservedKeywords = {"Duration", "Cycles", "Methods"} -- possibly be stored in Method description too, to prevent duplication
 
-local TableChanged = require(script.Parent.modules.TableChanged)
+local modules = script.Parent.modules 
+local TableChanged = require(modules.TableChanged)
+local Methods = require(script.Parent.Methods)
 local Data = require(script.Parent.Data)
 local benchmarks = Data.Benchmarks
 
-
 local function verifyMethods(methods)
-    if methods ~= nil and #methods > 0 then
-        for _, method in ipairs(methods) do
-            if not table.find(Benchmark.Methods, method) then
-                error(method .. " is an unkown method")
+    if methods == nil or #methods == 0 then
+        return Methods
+    end
+
+    local foundMethods = {}
+
+    for i, methodName in ipairs(methods) do
+        for _, method in ipairs(Methods) do
+            if methodName:lower() == method.Name:lower() then -- will be case insenstive
+                foundMethods[i] = method
             end
         end
-        return methods
+        if not foundMethods[i] then
+            error("A method with name '" .. methodName .. "' doesn't exist!")
+        end
     end
+
+    return foundMethods
 end
 
 local function removeReservedKeywords(config)

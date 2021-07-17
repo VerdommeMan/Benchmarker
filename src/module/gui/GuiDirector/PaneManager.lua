@@ -22,7 +22,7 @@ function PaneManager:_initProgressBar()
     self.progressBarManager = ProgressBarManager.new(self.pane.Bars.SubTotalProgress)
 
     self._conProgress = self.benchmark.ProgressChanged:Connect(function(progress)
-        self.progressBarManager:setLabel(self.benchmark.CurrentMethod, self.benchmark.CurrentFunction, progress)
+        self.progressBarManager:setLabel(self.benchmark.CurrentMethod.Name, self.benchmark.CurrentFunction, progress)
         self.progressBarManager:setTotal(self.benchmark.TotalCompleted, self.benchmark.Total)    
     end)
 

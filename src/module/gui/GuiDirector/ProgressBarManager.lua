@@ -21,8 +21,8 @@ function ProgressBarManager:setTotal(current, total)
     self._bar.base.parts.Text = current .. "/" .. total
 end
 
-function ProgressBarManager:setLabel(method, func, progress)
-    self._bar.base.SubTotal.Text = string.format("%s %s: %2i%%", method, func, progress * 100)
+function ProgressBarManager:setLabel(methodName, func, progress)
+    self._bar.base.SubTotal.Text = string.format("%s %s: %2i%%", methodName, func, progress * 100)
     self:_setProgress(progress)
 end
 
