@@ -15,7 +15,7 @@ function Stats.std(arr)
     for _, nr in ipairs(arr) do
        sum += (nr - mean)^2
     end
-    return sum / #arr
+    return (sum / #arr) ^ 0.5
 end
 
 function Stats.min(arr)
