@@ -7,7 +7,6 @@ local benchmarks = Data.Benchmarks
 
 benchmarks:keyChanged("CurrentBenchmark", function(benchmark)
     coroutine.wrap(function()
-        print("benchmark ", benchmark)
         if benchmark ~= nil then
             benchmark:_SetStatus("Running")
             print("called perform")

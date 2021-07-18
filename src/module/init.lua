@@ -27,19 +27,65 @@ require(script.BenchmarkPerformer)
 spawn(function()
     wait(2)
     Benchmarker.Create({
-        Duration = 10,
+        Duration = 5,
         Cycles = 1e6,
-        tester = function()
-            for i = 1, 100 do
-                
+        ["0.5"] = function()
+            for i = 1, 1e3 do
+                local _ = 25 ^ 0.5
             end
         end,
-        framer = function()
-            for i in ipairs(table.create(100, true)) do
-                
+        ["1/2"] = function()
+            for i = 1, 1e3 do
+                local _ = 25 ^ (1/2)    
             end
-        end
-    }):Start()
+        end,
+        ["math.sqrt"] = function()
+            for i = 1, 1e3 do
+                local _ = math.sqrt(25)    
+            end
+        end,
+    
+    })
+    Benchmarker.Create({
+        Duration = 5,
+        Cycles = 1e6,
+        ["0.5"] = function()
+            for i = 1, 1e3 do
+                local _ = 25 ^ 0.5
+            end
+        end,
+        ["1/2"] = function()
+            for i = 1, 1e3 do
+                local _ = 25 ^ (1/2)    
+            end
+        end,
+        ["math.sqrt"] = function()
+            for i = 1, 1e3 do
+                local _ = math.sqrt(25)    
+            end
+        end,
+    
+    })
+    Benchmarker.Create({
+        Duration = 5,
+        Cycles = 1e6,
+        ["0.5"] = function()
+            for i = 1, 1e3 do
+                local _ = 25 ^ 0.5
+            end
+        end,
+        ["1/2"] = function()
+            for i = 1, 1e3 do
+                local _ = 25 ^ (1/2)    
+            end
+        end,
+        ["math.sqrt"] = function()
+            for i = 1, 1e3 do
+                local _ = math.sqrt(25)    
+            end
+        end,
+    
+    })
 --     wait(2)
 --     Data.Benchmarks.Total:insert(Benchmark.new({}))
 --     wait(2)

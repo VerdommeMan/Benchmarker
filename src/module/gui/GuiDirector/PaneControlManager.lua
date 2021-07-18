@@ -37,7 +37,8 @@ function PaneControlManager:update()
         self.currentPane.pane.Parent = nil
         self.currentPane = self.panes[self.pos]
         self.currentPane.pane.Parent = self.paneHolder
-        self.maid.StatusChanged = self.currentPane.benchmark.StatusChanged:Connect(function()
+        self.maid.StatusChanged = self.currentPane.benchmark.StatusChanged:Connect(function(status)
+            print("Print from PCM, status changed to ", status)
             self:updateStartButton()
         end)
     end
@@ -69,7 +70,9 @@ function PaneControlManager:_startButton()
         benchmark:Pauze()
     elseif benchmark.Status == "Pauzed" then
         benchmark:Unpauze()
-    end 
+    elseif benchmark.Status == "Queued" then
+        benchmark:Cancel()  
+    end
 end
 
 function PaneControlManager:updateStartButton()
@@ -84,6 +87,7 @@ function PaneControlManager:updateStartButton()
         elseif benchmark.Status == "Pauzed" then
             start.Text = "UNPAUZE"
         else
+            print("button set to START")
             start.Text = "START"
         end
         if not isActive then

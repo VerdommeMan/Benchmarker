@@ -90,10 +90,9 @@ end
 
 function Benchmark:Start() -- starts the benchmark, if one is already started, it will wait until the previous to start
     if self.Status == Benchmark.Status.Waiting then
-        print(benchmarks.Waiting)
         benchmarks.Waiting:remove(benchmarks.Waiting:find(self))
-        benchmarks.Queue:insert(self)
         self:_SetStatus(Benchmark.Status.Queued)
+        benchmarks.Queue:insert(self)
     else
         warn("Cant start this benchmark, it is already: " .. self.Status)
     end
@@ -107,8 +106,8 @@ function Benchmark:Cancel() -- cancels the current benchmark, puts in waiting st
         warn("Can't cancel a benchmark that has been completed already.") 
     elseif self.Status == Benchmark.Status.Queued then
             benchmarks.Queue:remove(benchmarks.Queue:find(self))
-            benchmarks.Waiting:insert(self)
             self:_SetStatus(Benchmark.Status.Waiting)
+            benchmarks.Waiting:insert(self)
     end
 end
 
