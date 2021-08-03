@@ -6,6 +6,8 @@ local function getWidthBetween(gui, guiParent)
 	return math.abs(getWidth(gui) - getWidth(guiParent))
 end
 
+game.StarterGui:SetCoreGuiEnabled("PlayerList", false) -- #todo TEMP
+
 return function (root, stats)
     local background = root.Background
     local nextBtn = background.Content.VerticalList.Controls.Next

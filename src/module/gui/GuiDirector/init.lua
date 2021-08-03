@@ -1,4 +1,4 @@
--- OOP bc i might have multipe UIs, Director bc it manages other managers
+-- OOP bc i might have multipe UIs, Director bc it manages other managers. #todo maids, proper adherence to private vars
 
 local GuiDirector = {}
 GuiDirector.__index = GuiDirector

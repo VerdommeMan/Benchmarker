@@ -10,7 +10,7 @@ return {
     },
     {
         Name = "Duration",
-        Description = "Returns the duration a cycles takes.",
+        Description = "Returns the duration for a cycle.",
         Columns = {"Name","mean", "std", "min", "25%", "50%", "75%", "max"},
         Formatter = Formatter.new(2, true, " ", "SI", "s") 
     }

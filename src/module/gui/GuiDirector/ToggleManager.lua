@@ -52,11 +52,12 @@ function ToggleManager:_initBtns()
     for _, btn in ipairs(self.btns) do
         btn.Activated:Connect(function() 
             if btn ~= self.activeBtn then
-                self.table[self.activeBtn.Name].Visible = false
+                local oldTbl = self.table[self.activeBtn.Name]
+                oldTbl.Visible = false
+                oldTbl.AutomaticSize = Enum.AutomaticSize.None -- necessary bc AutomaticSize still takes account for invisible guiobjects, not sure if this a bug
                 local tbl = self.table[btn.Name]
                 tbl.Visible = true
-                -- stupid bug, doesnt update the height, forcing update now
-                tbl.Size = UDim2.new(1, -7,1, 0)
+                tbl.AutomaticSize = Enum.AutomaticSize.Y
                 self:_renderBtns(btn)
             end
         end)
