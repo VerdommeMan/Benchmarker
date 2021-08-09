@@ -41,10 +41,15 @@ function mod:insert(v, i) -- cant use table.insert, due to rawset
 end
 
 function mod:find(val)
-    for k, v in ipairs(self._tbl) do
-        if v == val then
-            return k
-        end
+    return table.find(self._tbl, val)
+end
+
+function mod:findThenRemove(val)
+    local found = self:find(val)
+    if found then
+        self:remove(found)
+    else
+        error("Didnt find the value in the table!", 2)
     end
 end
 

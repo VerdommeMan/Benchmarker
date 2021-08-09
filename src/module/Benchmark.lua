@@ -90,7 +90,7 @@ end
 
 function Benchmark:Start() -- starts the benchmark, if one is already started, it will wait until the previous to start
     if self.Status == Benchmark.Status.Waiting then
-        benchmarks.Waiting:remove(benchmarks.Waiting:find(self))
+        benchmarks.Waiting:findThenRemove(self)
         self:_SetStatus(Benchmark.Status.Queued)
         benchmarks.Queue:insert(self)
     else
@@ -105,7 +105,7 @@ function Benchmark:Cancel() -- cancels the current benchmark, puts in waiting st
     elseif self.Status == Benchmark.Status.Completed then
         warn("Can't cancel a benchmark that has been completed already.") 
     elseif self.Status == Benchmark.Status.Queued then
-            benchmarks.Queue:remove(benchmarks.Queue:find(self))
+            benchmarks.Queue:findThenRemove(self)
             self:_SetStatus(Benchmark.Status.Waiting)
             benchmarks.Waiting:insert(self)
     end
@@ -128,7 +128,17 @@ function Benchmark:Unpauze() -- unpauzes the current benchmark
 end
 
 function Benchmark:Restart() -- possible added
-    
+    if self.Status == Benchmark.Status.Completed then
+        self.Time = 0
+        self.Progress = 0
+        self.TotalCompleted = 0
+        self.Results = getTemplateResults(self.Methods)
+        benchmarks.Completed:findThenRemove(self)
+        self:_SetStatus(Benchmark.Status.Queued)
+        benchmarks.Queue:insert(self)
+    else
+        warn("Benchmark must be completed first in order to restart it!")
+    end
 end
 
 function Benchmark:_SetStatus(status)
@@ -139,6 +149,14 @@ end
 function Benchmark:_SetProgress(progress)
     self.Progress = progress
     self._ProgressBindeable:fire(progress)
+end
+
+function Benchmark:_Pauze()
+    if self.Status == Benchmark.Status.Pauzed then
+        self.StatusChanged:Wait()
+    else
+        task.wait()
+    end
 end
 
  return Prototype

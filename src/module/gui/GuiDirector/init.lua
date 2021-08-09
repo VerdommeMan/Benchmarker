@@ -36,6 +36,7 @@ function GuiDirector.new()
         self.paneControlManager:update()
     end)
 
+    -- #TODO TEMP
     wait(5)
     self.root.Parent = game.Players.LocalPlayer.PlayerGui
 

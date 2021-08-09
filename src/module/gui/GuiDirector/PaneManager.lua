@@ -8,14 +8,12 @@ local ProgressBarManager = require(script.Parent.ProgressBarManager)
 
 function PaneManager.new(pane, benchmark)
     local self = setmetatable({pane = pane, benchmark = benchmark, Tables = {}}, PaneManager)
-
-    for _, method in ipairs(benchmark.Methods) do 
-        table.insert(self.Tables, TableManager.new(benchmark, method, pane.Info.Table))
-    end
-
     self.toggle = ToggleManager.new(pane, benchmark.Methods)
+
+    self:_initPanes()
     self:_initProgressBar() 
-    
+    self:_listenRestart()
+
     return self
 end
 
@@ -32,9 +30,22 @@ function PaneManager:_initProgressBar()
             self.progressBarManager:show()
         elseif status == "Completed" then
             self.progressBarManager:hide()
-            self:_cleanProgressBarConnections()
         end
     end)
+end
+
+function PaneManager:_initPanes()
+    for _, method in ipairs(self.benchmark.Methods) do 
+        table.insert(self.Tables, TableManager.new(self.benchmark, method, self.pane.Info.Table))
+    end
+    self.toggle:alignTables()
+end
+
+function PaneManager:_destroyPanes()
+    for _, tbl in ipairs(self.Tables) do
+        tbl:destroy()
+    end
+    table.clear(self.Tables)
 end
 
 function PaneManager:_cleanProgressBarConnections()
@@ -44,14 +55,22 @@ function PaneManager:_cleanProgressBarConnections()
     self._conStatus = nil 
 end
 
+-- When the benchmark restarts it needs to recreate the Tables to show the new results
+function PaneManager:_listenRestart()
+    local oldStatus = self.benchmark.Status
+    self.conStatusRestart = self.benchmark.StatusChanged:Connect(function(status)
+        if oldStatus == "Completed" and status == "Queued" then
+            self:_destroyPanes()
+            self:_initPanes()
+        end
+        oldStatus = status
+    end)
+end
+
 function PaneManager:destroy()
-    if self._conPogress then
-        self:_cleanProgressBarConnections()
-    end
-    for _, tbl in ipairs(self.Tables) do
-        tbl:destroy()
-    end
-    table.clear(self.Tables)
+    self:_cleanProgressBarConnections()
+    self._conStatusRetart:Disconnect()
+    self:_destroyPanes()
     self.pane:Destroy()
     self.pane = nil
 end

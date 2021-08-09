@@ -71,7 +71,9 @@ function PaneControlManager:_startButton()
     elseif benchmark.Status == "Pauzed" then
         benchmark:Unpauze()
     elseif benchmark.Status == "Queued" then
-        benchmark:Cancel()  
+        benchmark:Cancel()
+    elseif benchmark.Status == "Completed" then
+        benchmark:Restart()  
     end
 end
 
@@ -81,13 +83,14 @@ function PaneControlManager:updateStartButton()
     local start = self.controls.Start
     local isActive = start.Active
 
-    if benchmark and benchmark.Status ~= "Completed" and (not currentBenchmark or currentBenchmark == benchmark) then
+    if benchmark and (not currentBenchmark or currentBenchmark == benchmark) then
         if benchmark.Status == "Running" then
             start.Text = "PAUZE"
         elseif benchmark.Status == "Pauzed" then
             start.Text = "UNPAUZE"
+        elseif benchmark.Status == "Completed" then
+            start.Text = "RESTART"
         else
-            print("button set to START")
             start.Text = "START"
         end
         if not isActive then

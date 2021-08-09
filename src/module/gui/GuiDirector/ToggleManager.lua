@@ -39,6 +39,11 @@ local function createButton(text, parent)
     return btn
 end
 
+local function setStateTable(tbl, active)
+    tbl.Visible = active
+    tbl.AutomaticSize = active and Enum.AutomaticSize.Y or Enum.AutomaticSize.None -- necessary bc AutomaticSize still takes account for invisible guiobjects, not sure if this a bug
+end
+
 function ToggleManager.new(pane, methods)
     local self = setmetatable({toggle = pane.Info.Selector.Toggle, table = pane.Info.Table, btns = {}}, ToggleManager)
     self:_createBtns(methods) 
@@ -52,12 +57,8 @@ function ToggleManager:_initBtns()
     for _, btn in ipairs(self.btns) do
         btn.Activated:Connect(function() 
             if btn ~= self.activeBtn then
-                local oldTbl = self.table[self.activeBtn.Name]
-                oldTbl.Visible = false
-                oldTbl.AutomaticSize = Enum.AutomaticSize.None -- necessary bc AutomaticSize still takes account for invisible guiobjects, not sure if this a bug
-                local tbl = self.table[btn.Name]
-                tbl.Visible = true
-                tbl.AutomaticSize = Enum.AutomaticSize.Y
+                setStateTable(self.table[self.activeBtn.Name], false)
+                setStateTable(self.table[btn.Name], true)
                 self:_renderBtns(btn)
             end
         end)
@@ -78,6 +79,13 @@ function ToggleManager:_renderBtns(newMethod)
         else
             applyProps(btn, setRichText(default, defaultPattern, btn.Name))
         end
+    end
+end
+
+-- sets the table in the correct state according to state of the buttons
+function ToggleManager:alignTables()
+    for _, tbl in ipairs(self.table:GetChildren()) do
+        setStateTable(tbl, tbl.Name == self.activeBtn.Name)
     end
 end
 

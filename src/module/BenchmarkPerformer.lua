@@ -1,7 +1,6 @@
 local BenchmarkPerformer = {}
 BenchmarkPerformer.__index = BenchmarkPerformer
 
-local RunService = game:GetService("RunService")
 local Data = require(script.Parent.Data)
 local benchmarks = Data.Benchmarks
 
@@ -44,7 +43,7 @@ function BenchmarkPerformer.CalcCycles(benchmark, func) -- Calc Cyles for a give
             subTime +=  os.clock() - startTime
             amount += 1
         end
-        RunService.Heartbeat:Wait()
+        benchmark:_Pauze()
         totalTime += subTime
         benchmark:_SetProgress(totalTime / duration)
     end
@@ -68,7 +67,7 @@ function BenchmarkPerformer.CalcDuration(benchmark, func) -- calc the duration f
             table.insert(results, diff)
             amount += 1
         end
-        RunService.Heartbeat:Wait()
+        benchmark:_Pauze()
         totalTime += subTime
         benchmark:_SetProgress(amount / cycles)
     end
