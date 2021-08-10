@@ -96,6 +96,7 @@ function Prototype.new(config) -- #todo get stuff from config like methods
     self.Results = getTemplateResults(self.Methods)
     benchmarks.Total:insert(self)
     benchmarks.Waiting:insert(self)
+    self:_initFinished()
 
     return self
 end
@@ -169,6 +170,15 @@ function Benchmark:_Pauze()
     else
         task.wait()
     end
+end
+
+-- #todo maid on conn
+function Benchmark:_initFinished() 
+    self.StatusChanged:Connect(function(status)
+        if status == Benchmark.Status.Completed then
+            self._FinishedBindeable:Fire()
+        end
+    end)
 end
 
  return Prototype
