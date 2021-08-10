@@ -1,6 +1,5 @@
 local Benchmark = {}
 
-Benchmark.__index = Benchmark
 Benchmark.Status = {Queued = "Queued", Waiting = "Waiting", Running = "Running", Pauzed = "Pauzed", Completed = "Completed"}
 Benchmark.ReservedKeywords = {"Duration", "Cycles", "Methods"} -- possibly be stored in Method description too, to prevent duplication
 
@@ -54,7 +53,20 @@ local function getTemplateResults(methods)
     return results
 end
 
-local Prototype = {}
+local function calcTime(startTime)
+    return time() - startTime
+end
+
+-- allows for special functionality, it calcs the time when requested only when the benchmark is running
+Benchmark.__index = function(t , k)
+    if k == "Time" then
+        print("calcing time")
+        return calcTime(t._StartTime)
+    end
+    return Benchmark[k]
+end
+
+local Prototype = {} -- using a prototype so that the users cant access the constructor
 
 function Prototype.new(config) -- #todo get stuff from config like methods
     local bindeable = Instance.new("BindableEvent") --#todo maid

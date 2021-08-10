@@ -15,16 +15,20 @@ benchmarks:keyChanged("CurrentBenchmark", function(benchmark)
 end)
 
 function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and diagnostics
+    benchmark._StartTime = time()
+    benchmark.Time = nil -- lets the time calc being delegated
+
     for key, func in pairs(benchmark.Functions) do
        benchmark.CurrentFunction = key
        
        for _, method in ipairs(benchmark.Methods) do
             benchmark.CurrentMethod = method
             benchmark.Results[method]:insert(BenchmarkPerformer["Calc" .. method.Name](benchmark, func))
-            print("Benchmark performed for ", key , func) 
             benchmark.TotalCompleted += 1   
        end
     end
+    
+    benchmark.Time = benchmark.Time -- looks useless but it isn't !!!
     benchmark:_SetStatus("Completed")
     benchmarks.CurrentBenchmark = nil
     benchmarks.Completed:insert(benchmark)
