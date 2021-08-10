@@ -73,7 +73,6 @@ end
 function TableManager:_initListeners()
     local result = self.benchmark.Results[self.method]
     result:exempt():changed(function()
-        print("change fired")
         local vals = CalcStats.calc(result[result:len()], self.method) 
         createColumn(vals).Parent = self.table.Body
     end)
