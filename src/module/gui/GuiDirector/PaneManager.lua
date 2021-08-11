@@ -59,7 +59,7 @@ end
 function PaneManager:_listenRestart()
     local oldStatus = self.benchmark.Status
     self.conStatusRestart = self.benchmark.StatusChanged:Connect(function(status)
-        if oldStatus == "Completed" and status == "Queued" then
+        if (oldStatus == "Completed" and status == "Queued") or (oldStatus == "Running" and status ~= "Completed")  then -- when restart or cancel #TODO, doesnt work when cancellign pauzed benchmark
             self:_destroyPanes()
             self:_initPanes()
         end

@@ -86,6 +86,26 @@ spawn(function()
         end,
     
     })
+
+    Benchmarker.Create({
+        ["must error"] = function()
+            while true do
+                
+            end
+        end
+    })
+
+    Benchmarker.Create({
+        ["must error nil"] = function()
+            function test()
+                ({})[nil][nil] = nil
+            end
+
+        (function ()
+                test()
+            end)()
+        end
+    })
 --     wait(2)
 --     Data.Benchmarks.Total:insert(Benchmark.new({}))
 --     wait(2)

@@ -1,4 +1,4 @@
--- Each column in the Methods needs function defined for it
+-- Defines the function for each column in the Methods module
 local Stats = {}
 
 function Stats.calc(arr, method)
@@ -11,7 +11,7 @@ function Stats.calc(arr, method)
 end
 
 function Stats.STD(arr)
-    local sum, mean = 0, Stats.mean(arr)
+    local sum, mean = 0, Stats.Mean(arr)
     for _, nr in ipairs(arr) do
        sum += (nr - mean)^2
     end

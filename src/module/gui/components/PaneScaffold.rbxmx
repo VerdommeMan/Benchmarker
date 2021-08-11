@@ -801,9 +801,9 @@
 							<token name="ApplyStrokeMode">0</token>
 							<BinaryString name="AttributesSerialize"></BinaryString>
 							<Color3 name="Color">
-								<R>0</R>
-								<G>0</G>
-								<B>0</B>
+								<R>1</R>
+								<G>1</G>
+								<B>1</B>
 							</Color3>
 							<bool name="Enabled">true</bool>
 							<token name="LineJoinMode">0</token>

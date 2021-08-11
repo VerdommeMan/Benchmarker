@@ -17,7 +17,7 @@ local function createCell(order, text, isHeader)
     lbl.AutomaticSize = Enum.AutomaticSize.X
     lbl.Size = UDim2.fromOffset(75, 25)
     lbl.RichText = isHeader
-    lbl.Text = isHeader and "<b>"..text.."</b>" or text
+    lbl.Text = isHeader and "<b>" .. text .. "</b>" or text
     lbl.TextColor3 = Column.TextColor3
     lbl.LayoutOrder = order
     return lbl

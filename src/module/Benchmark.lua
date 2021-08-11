@@ -66,6 +66,7 @@ Benchmark.__index = function(t , k)
     return Benchmark[k]
 end
 
+local id = 1
 local Prototype = {} -- using a prototype so that the users cant access the constructor
 
 function Prototype.new(config) -- #todo get stuff from config like methods
@@ -89,6 +90,7 @@ function Prototype.new(config) -- #todo get stuff from config like methods
         CurrentFunction = nil,
         TotalCompleted = 0,
         Time = 0,
+        Id = id,
         _exempt = true -- prevent TableChanged from mangling this Class
     }, Benchmark)
 
@@ -97,6 +99,8 @@ function Prototype.new(config) -- #todo get stuff from config like methods
     benchmarks.Total:insert(self)
     benchmarks.Waiting:insert(self)
     self:_initFinished()
+    
+    id += 1
 
     return self
 end
@@ -113,8 +117,7 @@ end
 
 function Benchmark:Cancel() -- cancels the current benchmark, puts in waiting state again #todo possible removal
     if self.Status == Benchmark.Status.Running then
-        --#todo
-        print("#todo")     
+        self._Cancelling = true
     elseif self.Status == Benchmark.Status.Completed then
         warn("Can't cancel a benchmark that has been completed already.") 
     elseif self.Status == Benchmark.Status.Queued then
@@ -142,10 +145,7 @@ end
 
 function Benchmark:Restart() -- possible added
     if self.Status == Benchmark.Status.Completed then
-        self.Time = 0
-        self.Progress = 0
-        self.TotalCompleted = 0
-        self.Results = getTemplateResults(self.Methods)
+        self:_Reset()
         benchmarks.Completed:findThenRemove(self)
         self:_SetStatus(Benchmark.Status.Queued)
         benchmarks.Queue:insert(self)
@@ -165,11 +165,28 @@ function Benchmark:_SetProgress(progress)
 end
 
 function Benchmark:_Pauze()
-    if self.Status == Benchmark.Status.Pauzed then
+    if self._Cancelling then
+        self._Cancelling = nil
+        error(Data.SPECIAL_CANCEL_FLAG) -- must be executed inside the thread which performs the benchmark
+    elseif self.Status == Benchmark.Status.Pauzed then
         self.StatusChanged:Wait()
     else
         task.wait()
     end
+end
+
+function Benchmark:_Reset()
+    self.Time = 0
+    self.Progress = 0
+    self.TotalCompleted = 0
+    self.Results = getTemplateResults(self.Methods)
+end
+
+function Benchmark:_HasBeenCancelled()
+    self:_Reset()
+    benchmarks.Runnning:findThenRemove(self)
+    self:_SetStatus(Benchmark.Status.Waiting)
+    benchmarks.Waiting:insert(self)
 end
 
 -- #todo maid on conn

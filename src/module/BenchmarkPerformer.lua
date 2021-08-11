@@ -1,17 +1,51 @@
 local BenchmarkPerformer = {}
 BenchmarkPerformer.__index = BenchmarkPerformer
 
-local Data = require(script.Parent.Data)
+local Benchmarker = script.Parent
+local Texts = require(Benchmarker.Texts)
+local Data = require(Benchmarker.Data)
 local benchmarks = Data.Benchmarks
 
+local function printStracktrace(thread, err) -- reconstruct a stacktrace
+    warn(err)
+    print("Stack Begin")
+    local lines = debug.traceback(thread):split("\n") -- can't rely on output of traceback but this should be exception safe
+    for i = 1, #lines - 3 do -- skipping built in funcs
+        print(lines[i])
+    end
+    print("Stack End")
+end
+
+local errorActions = {
+    ["Script timeout: exhausted allowed execution time"] = function(thread, benchmark)
+        printStracktrace(thread, string.format("Benchmark %d: exhausted allowed execution time", benchmark.Id))
+        warn(Texts.Solutions)
+    end,
+    [Data.SPECIAL_CANCEL_FLAG] = function(_, benchmark)
+        benchmark:_HasBeenCancelled()
+    end,
+    ["Default"] = function(thread, benchmark, msg)
+        warn(string.format("Benchmark %s: Incurred an error", benchmark.Id))
+        printStracktrace(thread, msg)
+    end
+
+}
+
+local function errorHandler(thread, err, benchmark)
+    (errorActions[err] or errorActions.Default)(thread, benchmark, err)
+end
+
 benchmarks:keyChanged("CurrentBenchmark", function(benchmark)
-    coroutine.wrap(function()
+    task.spawn(function() -- needed bc it doesnt call each listener in a seperate thread, thus not using a thread here, will put the ohters from being called
         if benchmark ~= nil then
             benchmark:_SetStatus("Running")
-            print("called perform")
-            BenchmarkPerformer.perform(benchmark)        
-        end
-    end)()
+            local cor = coroutine.create(BenchmarkPerformer.perform)
+            local success, msg = coroutine.resume(cor, benchmark)
+            if not success then
+                errorHandler(cor, msg, benchmark)
+            end
+        end     
+    end)
 end)
 
 function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and diagnostics
@@ -78,6 +112,5 @@ function BenchmarkPerformer.CalcDuration(benchmark, func) -- calc the duration f
     
     return results
 end
-
 
 return BenchmarkPerformer
