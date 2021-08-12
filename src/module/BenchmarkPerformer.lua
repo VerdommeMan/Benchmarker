@@ -16,6 +16,29 @@ local function printStracktrace(thread, err) -- reconstruct a stacktrace
     print("Stack End")
 end
 
+do -- saving this code temporariliy to detect and catch time out errors
+    local isTimeoutError = math.random(1,3) == 2 -- 50% to generate the error for testing purposes
+    local thread
+
+    task.spawn(function() -- order 1
+        task.defer(function() 
+            thread = coroutine.running() -- order 3
+            task.spawn(function() 
+                -- code
+                while isTimeoutError do
+
+                end
+            end)
+            coroutine.yield() -- errors when timeout error cascades or yield if the above doesnt have that error
+        end)
+        coroutine.yield() -- prevents the time out error from cascading, it cant cascade it in suspneded threads
+    end)
+    task.wait() -- order 2
+    print(coroutine.status(thread)) -- order 6, reading the status of the thread that potential has errored through the cascade
+    print("working")
+
+end
+
 local errorActions = {
     ["Script timeout: exhausted allowed execution time"] = function(thread, benchmark)
         printStracktrace(thread, string.format("Benchmark %d: exhausted allowed execution time", benchmark.Id))
@@ -31,7 +54,15 @@ local errorActions = {
 
 }
 
+game:GetService("ScriptContext").Error:Connect(function(msg, stacktrace, instance)
+    print(instance:GetFullName().." errored!")
+	print("Reason: "..msg)
+	print("Trace: "..stacktrace)
+    
+end)
+
 local function errorHandler(thread, err, benchmark)
+    print("received this msg", err);
     (errorActions[err] or errorActions.Default)(thread, benchmark, err)
 end
 
@@ -39,11 +70,18 @@ benchmarks:keyChanged("CurrentBenchmark", function(benchmark)
     task.spawn(function() -- needed bc it doesnt call each listener in a seperate thread, thus not using a thread here, will put the ohters from being called
         if benchmark ~= nil then
             benchmark:_SetStatus("Running")
-            local cor = coroutine.create(BenchmarkPerformer.perform)
-            local success, msg = coroutine.resume(cor, benchmark)
-            if not success then
-                errorHandler(cor, msg, benchmark)
-            end
+            print("started performing")
+            -- local cor = coroutine.create(BenchmarkPerformer.perform)
+            -- local success, msg = coroutine.resume(cor, benchmark)
+            -- print("have failed? ", success, msg)
+            -- warn("doesnt even get here")
+            -- if not success then
+            --     errorHandler(cor, msg, benchmark)
+            -- end
+
+            task.spawn(function()
+                BenchmarkPerformer.perform(benchmark)
+            end)
         end     
     end)
 end)

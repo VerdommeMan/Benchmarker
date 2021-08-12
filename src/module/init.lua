@@ -92,6 +92,7 @@ spawn(function()
             while true do
                 
             end
+            warn("should never ever be printed")
         end
     })
 
