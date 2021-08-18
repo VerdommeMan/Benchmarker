@@ -184,7 +184,7 @@ end
 
 function Benchmark:_HasBeenCancelled()
     self:_Reset()
-    benchmarks.Runnning:findThenRemove(self)
+    benchmarks.Running = nil
     self:_SetStatus(Benchmark.Status.Waiting)
     benchmarks.Waiting:insert(self)
 end

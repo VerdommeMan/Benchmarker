@@ -24,8 +24,7 @@ require(script.BenchmarkPerformer)
 
 
 
-spawn(function()
-    wait(2)
+delay(2, function()
     Benchmarker.Create({
         Duration = 5,
         Cycles = 1e6,
@@ -89,9 +88,10 @@ spawn(function()
 
     Benchmarker.Create({
         ["must error"] = function()
-            while true do
-                
+            local function tester()
+                while true do end
             end
+            tester()
             warn("should never ever be printed")
         end
     })
@@ -107,6 +107,30 @@ spawn(function()
             end)()
         end
     })
+
+    Benchmarker.Create({
+        ["shall cancel"] = function()
+            print("func is running at: ", coroutine.running())
+            error(Data.SPECIAL_CANCEL_FLAG)
+        end
+    })
+
+    local bench = Benchmarker.Create({
+        ["The canceling"] = function()
+            ("b"):rep(1e4)
+        end
+    })
+
+    
+    bench.StatusChanged:Connect(function(status)
+        print("Changed status to: ", status)
+        if status == "Running" then
+            task.wait(0.5)
+            print('Canceling bench', bench.Id)
+            bench:Cancel()
+        end
+    end)
+
 --     wait(2)
 --     Data.Benchmarks.Total:insert(Benchmark.new({}))
 --     wait(2)

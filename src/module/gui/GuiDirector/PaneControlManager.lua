@@ -37,8 +37,7 @@ function PaneControlManager:update()
         self.currentPane.pane.Parent = nil
         self.currentPane = self.panes[self.pos]
         self.currentPane.pane.Parent = self.paneHolder
-        self.maid.StatusChanged = self.currentPane.benchmark.StatusChanged:Connect(function(status)
-            print("Print from PCM, status changed to ", status)
+        self.maid.StatusChanged = self.currentPane.benchmark.StatusChanged:Connect(function()
             self:updateStartButton()
         end)
     end

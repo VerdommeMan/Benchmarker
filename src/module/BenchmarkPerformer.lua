@@ -3,85 +3,59 @@ BenchmarkPerformer.__index = BenchmarkPerformer
 
 local Benchmarker = script.Parent
 local Texts = require(Benchmarker.Texts)
+local Spcall = require(Benchmarker.modules.Spcall)
 local Data = require(Benchmarker.Data)
 local benchmarks = Data.Benchmarks
 
-local function printStracktrace(thread, err) -- reconstruct a stacktrace
+local function getErrorPart(msg) -- removes the 'game.SSS.script:69: ' part
+    return string.match(msg, ":%d+: (.*)") or msg -- in some rare cases, it only returns the errorPart already, too rare and inconsistent to find out why, but this should cover it
+end
+
+-- Due to being forced to (it was the only way) get the error with the stacktrace I need to split them back apart.
+local function splitStacktrace(stacktrace)
+    local lines = stacktrace:split("\n") -- can't rely on output of traceback but this should be exception safe 
+    return getErrorPart(table.remove(lines, 1)), lines
+end
+
+local function printStracktrace(stacktraceLines, err) -- reconstruct a stacktrace
     warn(err)
     print("Stack Begin")
-    local lines = debug.traceback(thread):split("\n") -- can't rely on output of traceback but this should be exception safe
-    for i = 1, #lines - 3 do -- skipping built in funcs
+    local lines = stacktraceLines
+    for i = 1, #lines - 4 do -- skipping my own funcs
         print(lines[i])
     end
     print("Stack End")
 end
 
-do -- saving this code temporariliy to detect and catch time out errors
-    local isTimeoutError = math.random(1,3) == 2 -- 50% to generate the error for testing purposes
-    local thread
-
-    task.spawn(function() -- order 1
-        task.defer(function() 
-            thread = coroutine.running() -- order 3
-            task.spawn(function() 
-                -- code
-                while isTimeoutError do
-
-                end
-            end)
-            coroutine.yield() -- errors when timeout error cascades or yield if the above doesnt have that error
-        end)
-        coroutine.yield() -- prevents the time out error from cascading, it cant cascade it in suspneded threads
-    end)
-    task.wait() -- order 2
-    print(coroutine.status(thread)) -- order 6, reading the status of the thread that potential has errored through the cascade
-    print("working")
-
-end
-
 local errorActions = {
-    ["Script timeout: exhausted allowed execution time"] = function(thread, benchmark)
-        printStracktrace(thread, string.format("Benchmark %d: exhausted allowed execution time", benchmark.Id))
+    ["Script timeout: exhausted allowed execution time"] = function(stacktraceLines, benchmark)
+        printStracktrace(stacktraceLines, string.format("Benchmark %d: exhausted allowed execution time", benchmark.Id))
         warn(Texts.Solutions)
     end,
     [Data.SPECIAL_CANCEL_FLAG] = function(_, benchmark)
         benchmark:_HasBeenCancelled()
     end,
-    ["Default"] = function(thread, benchmark, msg)
+    ["Default"] = function(stacktraceLines, benchmark, msg)
         warn(string.format("Benchmark %s: Incurred an error", benchmark.Id))
-        printStracktrace(thread, msg)
+        printStracktrace(stacktraceLines, msg)
     end
 
 }
 
-game:GetService("ScriptContext").Error:Connect(function(msg, stacktrace, instance)
-    print(instance:GetFullName().." errored!")
-	print("Reason: "..msg)
-	print("Trace: "..stacktrace)
-    
-end)
-
-local function errorHandler(thread, err, benchmark)
-    print("received this msg", err);
-    (errorActions[err] or errorActions.Default)(thread, benchmark, err)
+local function errorHandler(benchmark, err, stacktraceLines)
+    (errorActions[err] or errorActions.Default)(stacktraceLines, benchmark, err)
 end
 
 benchmarks:keyChanged("CurrentBenchmark", function(benchmark)
-    task.spawn(function() -- needed bc it doesnt call each listener in a seperate thread, thus not using a thread here, will put the ohters from being called
+    task.spawn(function() -- needed bc it doesnt call each listener in a seperate thread, thus not using a thread here, will put the ohters from being called until this is done
         if benchmark ~= nil then
             benchmark:_SetStatus("Running")
             print("started performing")
-            -- local cor = coroutine.create(BenchmarkPerformer.perform)
-            -- local success, msg = coroutine.resume(cor, benchmark)
-            -- print("have failed? ", success, msg)
-            -- warn("doesnt even get here")
-            -- if not success then
-            --     errorHandler(cor, msg, benchmark)
-            -- end
-
-            task.spawn(function()
-                BenchmarkPerformer.perform(benchmark)
-            end)
+            local suc, stacktrace = Spcall.xpcall(BenchmarkPerformer.perform, benchmark)
+            print(suc, stacktrace)
+            if not suc then
+                errorHandler(benchmark, splitStacktrace(stacktrace))
+            end
         end     
     end)
 end)
@@ -89,6 +63,7 @@ end)
 function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and diagnostics
     benchmark._StartTime = time()
     benchmark.Time = nil -- lets the time calc being delegated
+        print("This thread is performing: ", coroutine.running())
 
     for key, func in pairs(benchmark.Functions) do
        benchmark.CurrentFunction = key
@@ -110,7 +85,7 @@ function BenchmarkPerformer.CalcCycles(benchmark, func) -- Calc Cyles for a give
     local totalTime = 0
     local amount = 0
     local duration = benchmark.Duration
-
+    
     while totalTime < duration do
         local subTime = 0
         while subTime < Data.noYieldTime and totalTime + subTime < duration do
