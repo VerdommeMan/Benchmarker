@@ -1,6 +1,6 @@
 local Benchmark = {}
 
-Benchmark.Status = {Queued = "Queued", Waiting = "Waiting", Running = "Running", Pauzed = "Pauzed", Completed = "Completed"}
+Benchmark.Status = {Queued = "Queued", Waiting = "Waiting", Running = "Running", Pauzed = "Pauzed", Completed = "Completed", Errored = "Errored"}
 Benchmark.ReservedKeywords = {"Duration", "Cycles", "Methods"} -- possibly be stored in Method description too, to prevent duplication
 
 local modules = script.Parent.modules 
@@ -187,6 +187,12 @@ function Benchmark:_HasBeenCancelled()
     benchmarks.Running = nil
     self:_SetStatus(Benchmark.Status.Waiting)
     benchmarks.Waiting:insert(self)
+end
+
+function Benchmark:_HasIncurredAnError()
+    benchmarks.Running = nil
+    self:_SetStatus("Errored")
+    benchmarks.Errored:insert(self)
 end
 
 -- #todo maid on conn

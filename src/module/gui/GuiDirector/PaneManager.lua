@@ -24,13 +24,14 @@ function PaneManager:_initProgressBar()
         self.progressBarManager:setLabel(self.benchmark.CurrentMethod.Name, self.benchmark.CurrentFunction, progress)
         self.progressBarManager:setTotal(self.benchmark.TotalCompleted, self.benchmark.Total)    
     end)
-
+    local oldStatus
     self._conStatus = self.benchmark.StatusChanged:Connect(function(status)
         if status == "Running" then
             self.progressBarManager:show()
-        elseif status == "Completed" then
+        elseif oldStatus == "Running" then
             self.progressBarManager:hide()
         end
+        oldStatus = status
     end)
 end
 

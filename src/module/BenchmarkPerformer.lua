@@ -29,15 +29,17 @@ end
 
 local errorActions = {
     ["Script timeout: exhausted allowed execution time"] = function(stacktraceLines, benchmark)
-        printStracktrace(stacktraceLines, string.format("Benchmark %d: exhausted allowed execution time", benchmark.Id))
+        printStracktrace(stacktraceLines, string.format("Benchmark %d function '%s': exhausted allowed execution time", benchmark.Id, benchmark.CurrentFunction))
         warn(Texts.Solutions)
+        benchmark:_HasIncurredAnError()
     end,
     [Data.SPECIAL_CANCEL_FLAG] = function(_, benchmark)
         benchmark:_HasBeenCancelled()
     end,
     ["Default"] = function(stacktraceLines, benchmark, msg)
-        warn(string.format("Benchmark %s: Incurred an error", benchmark.Id))
-        printStracktrace(stacktraceLines, msg)
+        warn(string.format("Benchmark %d function '%s': Incurred an error", benchmark.Id, benchmark.CurrentFunction))
+        printStracktrace(stacktraceLines, msg) -- #TODO maybe restructure so that it can get the full error msg instead of just a part
+        benchmark:_HasIncurredAnError()
     end
 
 }
@@ -46,7 +48,7 @@ local function errorHandler(benchmark, err, stacktraceLines)
     (errorActions[err] or errorActions.Default)(stacktraceLines, benchmark, err)
 end
 
-benchmarks:keyChanged("CurrentBenchmark", function(benchmark)
+benchmarks:keyChanged("Running", function(benchmark)
     task.spawn(function() -- needed bc it doesnt call each listener in a seperate thread, thus not using a thread here, will put the ohters from being called until this is done
         if benchmark ~= nil then
             benchmark:_SetStatus("Running")
@@ -63,7 +65,6 @@ end)
 function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and diagnostics
     benchmark._StartTime = time()
     benchmark.Time = nil -- lets the time calc being delegated
-        print("This thread is performing: ", coroutine.running())
 
     for key, func in pairs(benchmark.Functions) do
        benchmark.CurrentFunction = key
@@ -77,7 +78,7 @@ function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and dia
     
     benchmark.Time = benchmark.Time -- looks useless but it isn't !!!
     benchmark:_SetStatus("Completed")
-    benchmarks.CurrentBenchmark = nil
+    benchmarks.Running = nil
     benchmarks.Completed:insert(benchmark)
 end
 

@@ -78,11 +78,11 @@ end
 
 function PaneControlManager:updateStartButton()
     local benchmark = self.currentPane.benchmark
-    local currentBenchmark = Data.Benchmarks.CurrentBenchmark 
+    local currentBenchmark = Data.Benchmarks.Running 
     local start = self.controls.Start
     local isActive = start.Active
 
-    if benchmark and (not currentBenchmark or currentBenchmark == benchmark) then
+    if benchmark and (not currentBenchmark or currentBenchmark == benchmark) and benchmark.Status ~= "Errored" then
         if benchmark.Status == "Running" then
             start.Text = "PAUZE"
         elseif benchmark.Status == "Pauzed" then

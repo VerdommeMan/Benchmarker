@@ -5,14 +5,14 @@ local benchmarks = Data.Benchmarks
 local queue = benchmarks.Queue
 
 queue:exempt():changed(function()
-    if not benchmarks.CurrentBenchmark and queue:len() > 0 then
-        benchmarks.CurrentBenchmark = table.remove(queue._tbl, 1)
+    if not benchmarks.Running and queue:len() > 0 then
+        benchmarks.Running = table.remove(queue._tbl, 1)
     end
 end)
 
-benchmarks:keyChanged("CurrentBenchmark", function(newVal)
+benchmarks:keyChanged("Running", function(newVal)
     if newVal == nil and queue:len() > 0 then
-        benchmarks.CurrentBenchmark = table.remove(queue._tbl, 1)     
+        benchmarks.Running = table.remove(queue._tbl, 1)     
     end 
 end)
 

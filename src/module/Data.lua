@@ -10,6 +10,7 @@ Data.Benchmarks = {
     Running = nil,
     Queue = {},
     Waiting = {},
+    Errored = {},
     Completed = {},
     Total = {}
 }

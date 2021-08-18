@@ -9,7 +9,7 @@ local config = {
     studioOnly = true,
     yieldtime = 0.1, -- seconds
     displayBasedOnContext = true, -- only display the gui in the server if its called from server an only on the client if its called from client
-    displayCoreGuis = false,
+    hideCoreGuis = true,
     defaultFullscreen = false -- decides if the gui will display by on fullscreen on creation
 }
 
@@ -161,8 +161,8 @@ function Benchmarker.StartAll() -- starts all the waiting benchmarks
 end
 
 function Benchmarker.Abort() -- cancels current running benchmark and queued benchmarks
-    if benchmarks.CurrentBenchmark then
-        benchmarks.CurrentBenchmark:Cancel()        
+    if benchmarks.Running then
+        benchmarks.Running:Cancel()        
     end
     for _, benchmark in ipairs(benchmarks.Queue._tbl) do
         benchmark:Cancel()
