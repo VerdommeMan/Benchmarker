@@ -164,7 +164,7 @@ function Benchmarker.Abort() -- cancels current running benchmark and queued ben
     if benchmarks.Running then
         benchmarks.Running:Cancel()        
     end
-    for _, benchmark in ipairs(benchmarks.Queue._tbl) do
+    for _, benchmark in ipairs(benchmarks.Queued._tbl) do
         benchmark:Cancel()
     end
 end

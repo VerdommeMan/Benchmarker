@@ -60,6 +60,7 @@ end
 function PaneManager:_listenRestart()
     local oldStatus = self.benchmark.Status
     self.conStatusRestart = self.benchmark.StatusChanged:Connect(function(status)
+        print(string.format("Changing status from %s to %s on benchmark %d", oldStatus, status, self.benchmark.Id))
         if (oldStatus == "Completed" and status == "Queued") or (oldStatus == "Running" and (status ~= "Completed" and status ~= "Pauzed"))  then -- when restart or cancel
             print("PANE MANAGER: destroying old panes")
             self:_destroyPanes()

@@ -97,7 +97,6 @@ function Prototype.new(config) -- #todo get stuff from config like methods
     self.Total = countDict(self.Functions) * #self.Methods
     self.Results = getTemplateResults(self.Methods)
     benchmarks.Total:insert(self)
-    benchmarks.Waiting:insert(self)
     self:_initFinished()
     
     id += 1
@@ -107,9 +106,7 @@ end
 
 function Benchmark:Start() -- starts the benchmark, if one is already started, it will wait until the previous to start
     if self.Status == Benchmark.Status.Waiting then
-        benchmarks.Waiting:findThenRemove(self)
-        self:_SetStatus(Benchmark.Status.Queued)
-        benchmarks.Queue:insert(self)
+        benchmarks.Waiting:findThenMove(self, benchmarks.Queued)
     else
         warn("Cant start this benchmark, it is already: " .. self.Status)
     end
@@ -121,23 +118,23 @@ function Benchmark:Cancel() -- cancels the current benchmark, puts in waiting st
     elseif self.Status == Benchmark.Status.Completed then
         warn("Can't cancel a benchmark that has been completed already.") 
     elseif self.Status == Benchmark.Status.Queued then
-            benchmarks.Queue:findThenRemove(self)
-            self:_SetStatus(Benchmark.Status.Waiting)
-            benchmarks.Waiting:insert(self)
+        benchmarks.Queue:findThenMove(self, benchmarks.Waiting)
     end
 end
 
 function Benchmark:Pauze() -- pauzes the current benchmark
     if self.Status == Benchmark.Status.Running then
-        self:_SetStatus(Benchmark.Status.Pauzed)        
+        benchmarks.Pauzed:insert(self)
+        benchmarks.Running = nil        
     else
         warn("Cant pauze this benchmark, it isn't running")
     end
 end
 
-function Benchmark:Unpauze() -- unpauzes the current benchmark
+
+function Benchmark:Unpauze() -- unpauzes the current benchmark, moves it to the front of the queue
     if self.Status == Benchmark.Status.Pauzed then
-        self:_SetStatus(Benchmark.Status.Running)
+        benchmarks.Pauzed:findThenMove(self, benchmarks.Queued, 1)
     else
         warn("Cant unpauze this benchmark, it isn't pauzed")
     end 
@@ -146,9 +143,7 @@ end
 function Benchmark:Restart() -- possible added
     if self.Status == Benchmark.Status.Completed then
         self:_Reset()
-        benchmarks.Completed:findThenRemove(self)
-        self:_SetStatus(Benchmark.Status.Queued)
-        benchmarks.Queue:insert(self)
+        benchmarks.Completed:findThenMove(self, benchmarks.Queued)
     else
         warn("Benchmark must be completed first in order to restart it!")
     end
@@ -169,7 +164,7 @@ function Benchmark:_Pauze()
         self._Cancelling = nil
         error(Data.SPECIAL_CANCEL_FLAG) -- must be executed inside the thread which performs the benchmark
     elseif self.Status == Benchmark.Status.Pauzed then
-        self.StatusChanged:Wait()
+        self.StatusChanged:Wait() -- #TODO: cancel can also cancel a pauzed benchmark and then it must
     else
         task.wait()
     end
@@ -185,13 +180,11 @@ end
 function Benchmark:_HasBeenCancelled()
     self:_Reset()
     benchmarks.Running = nil
-    self:_SetStatus(Benchmark.Status.Waiting)
     benchmarks.Waiting:insert(self)
 end
 
 function Benchmark:_HasIncurredAnError()
     benchmarks.Running = nil
-    self:_SetStatus("Errored")
     benchmarks.Errored:insert(self)
 end
 
@@ -202,6 +195,10 @@ function Benchmark:_initFinished()
             self._FinishedBindeable:Fire()
         end
     end)
+end
+
+if (benchmarks == true) then
+    print()
 end
 
  return Prototype

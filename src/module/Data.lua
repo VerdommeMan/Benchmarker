@@ -8,7 +8,8 @@ Data.Version = "2.0.0"
 Data.Theme = Themes["Dark"]
 Data.Benchmarks = {
     Running = nil,
-    Queue = {},
+    Pauzed = {},
+    Queued = {},
     Waiting = {},
     Errored = {},
     Completed = {},
@@ -16,9 +17,6 @@ Data.Benchmarks = {
 }
 
 
-game:GetService("ScriptContext").Error:Connect(function(message, trace, script)
-    print(Data)
-end)
 
 
-return TableChanged(Data, {Theme = true}) -- Observer pattern
+return TableChanged(Data, {Theme = true})

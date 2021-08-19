@@ -49,9 +49,8 @@ local function errorHandler(benchmark, err, stacktraceLines)
 end
 
 benchmarks:keyChanged("Running", function(benchmark)
-    if benchmark == nil then return end
-    benchmark:_SetStatus("Running")
-    print("started performing")
+    if benchmark == nil or benchmark.Time ~= 0 then return end
+    print("started performing benchmark", benchmark.Id)
     local suc, stacktrace = Spcall.xpcall(BenchmarkPerformer.perform, benchmark)
     print(suc, stacktrace)
     if not suc then
@@ -74,7 +73,6 @@ function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and dia
     end
     
     benchmark.Time = benchmark.Time -- looks useless but it isn't !!!
-    benchmark:_SetStatus("Completed")
     benchmarks.Running = nil
     benchmarks.Completed:insert(benchmark)
 end
