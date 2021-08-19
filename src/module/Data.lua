@@ -16,4 +16,9 @@ Data.Benchmarks = {
 }
 
 
+game:GetService("ScriptContext").Error:Connect(function(message, trace, script)
+    print(Data)
+end)
+
+
 return TableChanged(Data, {Theme = true}) -- Observer pattern

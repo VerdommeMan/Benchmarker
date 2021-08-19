@@ -3,6 +3,25 @@
 local CHANGED = {} -- unique key
 local mod = {}
 
+local Connection = {}
+
+function Connection.new(listeners, callback)
+    local connection = {}
+    local thread = coroutine.create(function(...)
+        while true do
+            callback(...)    
+            coroutine.yield() -- gotta keep this thread alive
+        end
+    end)
+    table.insert(listeners, thread)
+    function connection:disconnect()
+        table.remove(listeners, table.find(listeners, thread))
+        self.disconnect = nil
+    end
+    return connection    
+end
+
+
 local function initChanged(tbl, childExecptions)
     for k,v in pairs(tbl) do
         if type(v) == "table" and not (childExecptions or {})[k] then
@@ -29,7 +48,7 @@ function mod:keyChanged(key, callback)
     if not self._listeners[key] then
         self._listeners[key] = {}
     end
-    table.insert(self._listeners[key], callback)
+    return Connection.new(self._listeners[key], callback)
 end
 
 function mod:len()
@@ -66,7 +85,7 @@ function mod:remove(i) -- cant use table.remove, due to rawset
 end
 
 function mod:changed(callback)
-    table.insert(self._listeners[CHANGED], callback)
+    return Connection.new(self._listeners[CHANGED], callback)
 end
 
 -- This method prevents the added children that are tables from being transformed into this new format
