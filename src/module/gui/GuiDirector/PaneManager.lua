@@ -28,7 +28,7 @@ function PaneManager:_initProgressBar()
     self._conStatus = self.benchmark.StatusChanged:Connect(function(status)
         if status == "Running" then
             self.progressBarManager:show()
-        elseif oldStatus == "Running" then
+        elseif oldStatus == "Running" and status ~= "Pauzed" then
             self.progressBarManager:hide()
         end
         oldStatus = status
@@ -60,7 +60,8 @@ end
 function PaneManager:_listenRestart()
     local oldStatus = self.benchmark.Status
     self.conStatusRestart = self.benchmark.StatusChanged:Connect(function(status)
-        if (oldStatus == "Completed" and status == "Queued") or (oldStatus == "Running" and status ~= "Completed")  then -- when restart or cancel #TODO, doesnt work when cancellign pauzed benchmark
+        if (oldStatus == "Completed" and status == "Queued") or (oldStatus == "Running" and (status ~= "Completed" and status ~= "Pauzed"))  then -- when restart or cancel
+            print("PANE MANAGER: destroying old panes")
             self:_destroyPanes()
             self:_initPanes()
         end

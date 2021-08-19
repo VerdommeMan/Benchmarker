@@ -49,17 +49,14 @@ local function errorHandler(benchmark, err, stacktraceLines)
 end
 
 benchmarks:keyChanged("Running", function(benchmark)
-    task.spawn(function() -- needed bc it doesnt call each listener in a seperate thread, thus not using a thread here, will put the ohters from being called until this is done
-        if benchmark ~= nil then
-            benchmark:_SetStatus("Running")
-            print("started performing")
-            local suc, stacktrace = Spcall.xpcall(BenchmarkPerformer.perform, benchmark)
-            print(suc, stacktrace)
-            if not suc then
-                errorHandler(benchmark, splitStacktrace(stacktrace))
-            end
-        end     
-    end)
+    if benchmark ~= nil then return end
+    benchmark:_SetStatus("Running")
+    print("started performing")
+    local suc, stacktrace = Spcall.xpcall(BenchmarkPerformer.perform, benchmark)
+    print(suc, stacktrace)
+    if not suc then
+        errorHandler(benchmark, splitStacktrace(stacktrace))
+    end
 end)
 
 function BenchmarkPerformer.perform(benchmark) -- #todo pcall for errros and diagnostics

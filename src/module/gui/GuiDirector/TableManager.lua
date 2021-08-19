@@ -72,7 +72,7 @@ end
 
 function TableManager:_initListeners()
     local result = self.benchmark.Results[self.method]
-    result:exempt():changed(function()
+    result:exempt():changed(function() -- #TODO make it return disconnect object and disconnect on destroy
         local vals = CalcStats.calc(result[result:len()], self.method) 
         createColumn(vals).Parent = self.table.Body
     end)
