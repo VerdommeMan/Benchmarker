@@ -49,7 +49,7 @@ local function errorHandler(benchmark, err, stacktraceLines)
 end
 
 benchmarks:keyChanged("Running", function(benchmark)
-    if benchmark ~= nil then return end
+    if benchmark == nil then return end
     benchmark:_SetStatus("Running")
     print("started performing")
     local suc, stacktrace = Spcall.xpcall(BenchmarkPerformer.perform, benchmark)
