@@ -3,23 +3,26 @@
 local CHANGED = {} -- unique keys
 local ADDED = {}
 local REMOVED = {}
+local REPLACED = {}
 local mod = {}
 
 local Connection = {}
 
-function Connection.new(listeners, callback)
+function Connection.new(listeners, listener, callback)
     local connection = {}
-    local thread = coroutine.create(function(...)
+
+    listener.thread = coroutine.create(function(...) -- not requried anymore but ill keep it
         callback(...)    
         while true do
             callback(coroutine.yield()) -- gotta keep this thread alive    
         end
     end)
-    table.insert(listeners, thread)
+    table.insert(listeners, listener)
     function connection:disconnect()
-        table.remove(listeners, table.find(listeners, thread))
+        table.remove(listeners, table.find(listeners, listener))
         self.disconnect = nil
     end
+
     return connection    
 end
 
@@ -38,30 +41,14 @@ function __newindex(t, k ,v)
     if oldV ~= v then
         t._tbl[k] = (not t._exempt) and type(v) == "table" and (not v._exempt) and initChanged(v) or v
           
-        for _, listener in ipairs(t._listeners[k] or {}) do
-            task.spawn(listener, v)
-        end
-        for _, listener in ipairs(t._listeners[CHANGED]) do
-            task.spawn(listener, v)
-        end
-        if oldV == nil then
-            for _, listener in ipairs(t._listeners[ADDED]) do
-                task.spawn(listener, v)
-            end
-        end
-        if v == nil then
-            for _, listener in ipairs(t._listeners[REMOVED]) do
-                task.spawn(listener, v)
+        local mode = (v == nil and REMOVED) or (oldV == nil and ADDED) or REPLACED
+        
+        for _, listener in ipairs(t._listeners) do
+            if listener.changed or listener.key == k or listener.mode == mode then -- not a fan, couldnt figure out a way do avoid checks
+                task.spawn(listener.thread, v)
             end
         end
     end
-end
-
-function mod:keyChanged(key, callback)
-    if not self._listeners[key] then
-        self._listeners[key] = {}
-    end
-    return Connection.new(self._listeners[key], callback)
 end
 
 function mod:len()
@@ -124,17 +111,25 @@ function mod:clear() -- only for arrays, triggers each removal
     end
 end
 
+function mod:keyChanged(key, callback)
+    return Connection.new(self._listeners, {key = key}, callback)
+end
+
 -- Added event, only fires when adding an element to a key which was previously nil
 function mod:added(callback)
-    return Connection.new(self._listeners[ADDED], callback)
+    return Connection.new(self._listeners, {mode = ADDED}, callback)
 end
 
 function mod:changed(callback)
-    return Connection.new(self._listeners[CHANGED], callback)
+    return Connection.new(self._listeners, {changed = true}, callback)
+end
+
+function mod:replaced(callback)
+    return Connection.new(self._listeners, {mode = REPLACED}, callback)
 end
 
 function mod:removed(callback)
-    return Connection.new(self._listeners[REMOVED], callback)
+    return Connection.new(self._listeners, {mode = REMOVED}, callback)
 end
 
 -- This method prevents the added children that are tables from being transformed into this new format
