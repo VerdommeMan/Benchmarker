@@ -10,13 +10,7 @@ local Connection = {}
 
 function Connection.new(listeners, listener, callback)
     local connection = {}
-
-    listener.thread = coroutine.create(function(...) -- not requried anymore but ill keep it
-        callback(...)    
-        while true do
-            callback(coroutine.yield()) -- gotta keep this thread alive    
-        end
-    end)
+    listener.thread = callback
     table.insert(listeners, listener)
     function connection:disconnect()
         table.remove(listeners, table.find(listeners, listener))
@@ -45,7 +39,7 @@ function __newindex(t, k ,v)
         
         for _, listener in ipairs(t._listeners) do
             if listener.changed or listener.key == k or listener.mode == mode then -- not a fan, couldnt figure out a way do avoid checks
-                task.spawn(listener.thread, v)
+                task.spawn(listener.thread, v, oldV)
             end
         end
     end
