@@ -6,6 +6,16 @@ local Data = require(root.Data)
 
 local default, active, theme, defaultPattern, activePattern
 
+local function setByName(array)
+    local names = {}
+
+    for _, instance in ipairs(array) do
+        names[instance.Name] = instance
+    end
+
+    return names
+end
+
 local function shallowCopy(tbl)
 	local newTbl = {}
 	
@@ -39,13 +49,9 @@ local function createButton(text, parent)
     return btn
 end
 
-local function setStateTable(tbl, active)
-    tbl.Visible = active
-    tbl.AutomaticSize = active and Enum.AutomaticSize.Y or Enum.AutomaticSize.None -- necessary bc AutomaticSize still takes account for invisible guiobjects, not sure if this a bug
-end
-
 function ToggleManager.new(pane, methods)
     local self = setmetatable({toggle = pane.Info.Selector.Toggle, table = pane.Info.Table, btns = {}}, ToggleManager)
+    self.tables = setByName(self.table:GetChildren())
     self:_createBtns(methods) 
     self.activeBtn = self.btns[#self.btns] 
     self:_renderBtns(self.activeBtn)
@@ -55,10 +61,10 @@ end
 
 function ToggleManager:_initBtns()
     for _, btn in ipairs(self.btns) do
-        btn.Activated:Connect(function() 
+        btn.Activated:Connect(function() -- #TODO clean this up
             if btn ~= self.activeBtn then
-                setStateTable(self.table[self.activeBtn.Name], false)
-                setStateTable(self.table[btn.Name], true)
+                self.tables[self.activeBtn.Name].Parent = nil -- setting parent instead of .Visible bc had lots of issues bc of AutomaticSize
+                self.tables[btn.Name].Parent = self.table
                 self:_renderBtns(btn)
             end
         end)
@@ -84,14 +90,20 @@ end
 
 -- sets the table in the correct state according to state of the buttons
 function ToggleManager:alignTables()
-    for _, tbl in ipairs(self.table:GetChildren()) do
-        setStateTable(tbl, tbl.Name == self.activeBtn.Name)
+    for _, tbl in pairs(self.tables) do
+        tbl.Parent = tbl.Name == self.activeBtn.Name and self.table or nil
     end
 end
 
 function ToggleManager:updateTheme()
     ToggleManager.setTheme()
     self:_renderBtns(self.activeBtn)
+end
+
+function ToggleManager:destroy() -- prob not needed
+    self.toggle = nil
+    self.table = nil
+    self.tables = nil
 end
 
 function ToggleManager.setTheme()

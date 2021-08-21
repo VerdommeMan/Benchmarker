@@ -70,7 +70,7 @@ end
 
 local function clearColumn(parent)
     for _, child in ipairs(parent:GetChildren()) do
-        if child.LayoutOrder ~= 0 then
+        if child:IsA("GuiObject") and child.LayoutOrder > 1 then
             child:Destroy()
         end
     end

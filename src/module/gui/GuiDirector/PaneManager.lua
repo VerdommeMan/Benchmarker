@@ -8,12 +8,11 @@ local ProgressBarManager = require(script.Parent.ProgressBarManager)
 
 function PaneManager.new(pane, benchmark)
     local self = setmetatable({pane = pane, benchmark = benchmark, Tables = {}}, PaneManager)
-    self.toggle = ToggleManager.new(pane, benchmark.Methods)
-
+    
     self:_initPanes()
     self:_initProgressBar() 
-    self:_listenRestart()
-
+    self.toggle = ToggleManager.new(pane, benchmark.Methods)
+    
     return self
 end
 
@@ -39,7 +38,6 @@ function PaneManager:_initPanes()
     for _, method in ipairs(self.benchmark.Methods) do 
         table.insert(self.Tables, TableManager.new(self.benchmark, method, self.pane.Info.Table))
     end
-    self.toggle:alignTables()
 end
 
 function PaneManager:_destroyPanes()
@@ -56,23 +54,9 @@ function PaneManager:_cleanProgressBarConnections()
     self._conStatus = nil 
 end
 
--- When the benchmark restarts it needs to recreate the Tables to show the new results
-function PaneManager:_listenRestart()
-    local oldStatus = self.benchmark.Status
-    self.conStatusRestart = self.benchmark.StatusChanged:Connect(function(status)
-        print(string.format("Changing status from %s to %s on benchmark %d", oldStatus, status, self.benchmark.Id))
-        if (oldStatus == "Completed" and status == "Queued") or (oldStatus == "Running" and (status ~= "Completed" and status ~= "Pauzed"))  then -- when restart or cancel
-            print("PANE MANAGER: destroying old panes")
-            self:_destroyPanes()
-            self:_initPanes()
-        end
-        oldStatus = status
-    end)
-end
-
 function PaneManager:destroy()
+    self.toggle:destroy()
     self:_cleanProgressBarConnections()
-    self._conStatusRetart:Disconnect()
     self:_destroyPanes()
     self.pane:Destroy()
     self.pane = nil
