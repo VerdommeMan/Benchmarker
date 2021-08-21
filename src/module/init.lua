@@ -43,6 +43,20 @@ delay(2, function()
                 local _ = math.sqrt(25)    
             end
         end,
+        ["0.5 in function long name"] = function()
+            local function sqrt(nr)
+                return nr ^ 0.5
+            end
+            for i = 1, 1e3 do
+                local _ = sqrt(25)   
+            end
+            
+        end,
+        ["func creation"] = function()
+            local function sqrt(nr)
+                return nr ^ 0.5
+            end
+        end,
     
     })
     Benchmarker.Create({

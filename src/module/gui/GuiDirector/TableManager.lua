@@ -6,17 +6,22 @@ local module = guiFolder.Parent
 local Data = require(module.Data)
 local CalcStats = require(module.CalcStatistics)
 local Maid = require(module.modules.Maid)
+local TextService = game:GetService("TextService")
 
 local Column = Data.Theme.Column
 local TableScaffold = guiFolder.components.TableScaffold
+
+local function getWidth(string)
+   local x = TextService:GetTextSize(string, 8,"Legacy" , Vector2.new(1000,1000)).X + 2
+   return x > 75 and x or 75
+end
 
 local function createCell(order, text, isHeader)
     local lbl = Instance.new("TextLabel")
     lbl.Name = "Cell"
     lbl.BorderSizePixel = 0
     lbl.BackgroundColor3 = order % 4 == 0 and Column.Primary or Column.Secondary
-    lbl.AutomaticSize = Enum.AutomaticSize.X
-    lbl.Size = UDim2.fromOffset(75, 25)
+    lbl.Size = UDim2.new(1, 0, 0, 25)
     lbl.RichText = isHeader
     lbl.Text = isHeader and "<b>" .. text .. "</b>" or text
     lbl.TextColor3 = Column.TextColor3
@@ -35,11 +40,11 @@ local function createBorder(order)
     return frame
 end
 
-local function createColumnHolder()
+local function createColumnHolder(width)
     local frame = Instance.new("Frame")
     frame.BackgroundTransparency = 1
     frame.AutomaticSize = Enum.AutomaticSize.Y
-    frame.Size = UDim2.fromOffset(75, 0)
+    frame.Size = UDim2.fromOffset(width or 75, 0)
     local listLayout = Instance.new("UIListLayout")
     listLayout.FillDirection = Enum.FillDirection.Vertical
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -48,7 +53,7 @@ local function createColumnHolder()
 end
 
 local function createShell(name, parent)
-    local shell = createColumnHolder()
+    local shell = createColumnHolder(getWidth(name))
     shell.Name = name
     createCell(0, name).Parent = shell
     createBorder(1).Parent = shell
