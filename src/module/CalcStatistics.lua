@@ -4,8 +4,9 @@ local Stats = {}
 function Stats.calc(arr, method)
     table.sort(arr)  
     local results = {}
-    for i, stat in ipairs(method.Columns) do
-        results[i] = i ~= 1 and method.Formatter:format(Stats[stat](arr)) or Stats[stat](arr) 
+    for _, stat in ipairs(method.Columns) do
+        if stat == "Name" then continue end
+        table.insert(results, method.Formatter:format(Stats[stat](arr))) 
     end
     return results
 end
@@ -48,10 +49,6 @@ end
 
 Stats["75%"] = function(arr)
     return Stats.percentile(arr, 0.75)
-end
-
-function Stats.Name(arr)
-    return arr.Name
 end
 
 function Stats.Cycles(arr)

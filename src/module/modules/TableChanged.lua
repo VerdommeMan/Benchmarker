@@ -9,7 +9,7 @@ local mod = {}
 local Connection = {}
 
 function Connection.new(listeners, listener, callback)
-    local connection = {}
+    local connection = {ClassName = "Connection"}
     listener.thread = callback
     table.insert(listeners, listener)
     function connection:disconnect()
@@ -99,9 +99,9 @@ function mod:rightshift(at, to) -- silent shift
     end 
 end
 
-function mod:clear() -- only for arrays, triggers each removal
-    for i = self:len(), 1, -1 do
-        self[i] = nil
+function mod:clear()
+    for key in pairs(self._tbl) do
+        self[key] = nil
     end
 end
 

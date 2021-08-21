@@ -8,7 +8,7 @@ end
 
 game.StarterGui:SetCoreGuiEnabled("PlayerList", false) -- #todo TEMP
 
-return function (root, stats)
+return function(root, stats)
     local background = root.Background
     local nextBtn = background.Content.VerticalList.Controls.Next
     local atTop = false

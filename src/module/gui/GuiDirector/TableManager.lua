@@ -5,6 +5,7 @@ local guiFolder = script.Parent.Parent
 local module = guiFolder.Parent
 local Data = require(module.Data)
 local CalcStats = require(module.CalcStatistics)
+local Maid = require(module.modules.Maid)
 
 local Column = Data.Theme.Column
 local TableScaffold = guiFolder.components.TableScaffold
@@ -46,42 +47,64 @@ local function createColumnHolder()
     return frame
 end
 
-local function createColumn(config, parent)
-    local frame = parent or createColumnHolder()
+local function createShell(name, parent)
+    local shell = createColumnHolder()
+    shell.Name = name
+    createCell(0, name).Parent = shell
+    createBorder(1).Parent = shell
+    shell.Parent = parent
+    return shell
+end
 
-    local order = 0
+local function fillColumn(config, parent, isHeader)
+    local order = isHeader and 0 or 2
     for _, nr in ipairs(config) do
-        createCell(order, nr, parent).Parent = frame
+        createCell(order, nr, isHeader).Parent = parent
         order += 1
         if nr ~= #config then
-            createBorder(order).Parent = frame
+            createBorder(order).Parent = parent
             order += 1    
         end
     end
-    return frame
+end
+
+local function clearColumn(parent)
+    for _, child in ipairs(parent:GetChildren()) do
+        if child.LayoutOrder ~= 0 then
+            child:Destroy()
+        end
+    end
 end
 
 function TableManager.new(benchmark, method, tableHolder)
-    local self = setmetatable({table = TableScaffold:Clone(), benchmark = benchmark, method = method}, TableManager)
-    self.table.Name = method.Name
-    self.table.Parent = tableHolder
-    createColumn(method.Columns, self.table.Header)
+    local self = setmetatable({benchmark = benchmark, method = method}, TableManager)
+    self._maid = Maid.new()
+    local tbl = TableScaffold:Clone()  
+    self._maid.table = tbl 
+    tbl.Name = method.Name
+    tbl.Parent = tableHolder
+    fillColumn(method.Columns, tbl.Header, true)
     self:_initListeners()
     return self
 end
 
 function TableManager:_initListeners()
-    local result = self.benchmark.Results[self.method]
-    self._changed = result:exempt():changed(function() -- #TODO make it return disconnect object and disconnect on destroy
-        local vals = CalcStats.calc(result[result:len()], self.method) 
-        createColumn(vals).Parent = self.table.Body
-    end)
+    local results = self.benchmark.Results[self.method]
+    for _, header in ipairs(results.Headers) do
+        local shell = createShell(header, self._maid.table.Body)
+        self._maid["Listener | " .. header] = results.Body:keyChanged(header, function(result)
+            if result then
+                local vals = CalcStats.calc(result, self.method)
+                fillColumn(vals, shell)
+            else
+                clearColumn(shell)
+            end
+        end)
+    end
 end
+
 function TableManager:destroy()
-    self._changed:disconnect()
-    self._changed = nil
-    self.table:destroy()
-    self.table = nil
+    self._maid:DoCleaning()
 end
 
 return TableManager

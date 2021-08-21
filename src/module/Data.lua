@@ -16,7 +16,15 @@ Data.Benchmarks = {
     Total = {}
 }
 
+local struct = {
+    Duration = { 
+        headers = {},
+        body = {
 
+        }
+
+    }
+}
 
 
 return TableChanged(Data, {Theme = true})

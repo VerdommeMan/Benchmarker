@@ -45,10 +45,16 @@ local function countDict(dict)
     return count
 end
 
-local function getTemplateResults(methods)
+local function getTemplateResults(methods, functions)
     local results = {}
     for _, method in ipairs(methods) do
-        results[method] = TableChanged({})
+        results[method] = {
+            Headers = {},
+            Body = TableChanged({})
+        }
+        for key in pairs(functions) do
+            table.insert(results[method].Headers, key)
+        end
     end
     return results
 end
@@ -95,7 +101,7 @@ function Prototype.new(config) -- #todo get stuff from config like methods
     }, Benchmark)
 
     self.Total = countDict(self.Functions) * #self.Methods
-    self.Results = getTemplateResults(self.Methods)
+    self.Results = getTemplateResults(self.Methods, self.Functions)
     benchmarks.Total:insert(self)
     self:_initFinished()
     
@@ -174,7 +180,9 @@ function Benchmark:_Reset()
     self.Time = 0
     self.Progress = 0
     self.TotalCompleted = 0
-    self.Results = getTemplateResults(self.Methods)
+    for _, result in pairs(self.Results) do
+        result.Body:clear()
+    end
 end
 
 function Benchmark:_HasBeenCancelled()

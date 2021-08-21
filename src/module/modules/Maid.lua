@@ -6,6 +6,19 @@
 local Maid = {}
 Maid.ClassName = "Maid"
 
+local function cleanTask(task)
+	if type(task) == "function" then
+		task()
+	elseif typeof(task) == "RBXScriptConnection" then
+		task:Disconnect()
+	elseif task.Destroy or task.destroy then -- Modified to allow camelCase
+		(task.Destroy or task.destroy)(task)
+	elseif task.Disconnect or task.disconnect then 
+		(task.Disconnect or task.disconnect)(task)
+	end
+end
+
+
 --- Returns a new Maid object
 -- @constructor Maid.new()
 -- @treturn Maid
@@ -53,15 +66,7 @@ function Maid:__newindex(index, newTask)
 	tasks[index] = newTask
 
 	if oldTask then
-		if type(oldTask) == "function" then
-			oldTask()
-		elseif typeof(oldTask) == "RBXScriptConnection" then
-			oldTask:Disconnect()
-		elseif oldTask.Destroy then
-			oldTask:Destroy()
-        elseif oldTask.destroy then
-            oldTask:destroy()
-		end
+		cleanTask(oldTask)
 	end
 end
 
@@ -106,9 +111,9 @@ function Maid:DoCleaning()
 
 	-- Disconnect all events first as we know this is safe
 	for index, task in pairs(tasks) do
-		if typeof(task) == "RBXScriptConnection" then
+		if typeof(task) == "RBXScriptConnection" or task.ClassName == "Connection" then
 			tasks[index] = nil
-			task:Disconnect()
+			cleanTask(task)
 		end
 	end
 
@@ -116,15 +121,7 @@ function Maid:DoCleaning()
 	local index, task = next(tasks)
 	while task ~= nil do
 		tasks[index] = nil
-		if type(task) == "function" then
-			task()
-		elseif typeof(task) == "RBXScriptConnection" then
-			task:Disconnect()
-		elseif task.Destroy then
-			task:Destroy()
-        elseif task.destroy then -- Modified to allow camelCase
-            task:destroy()
-		end
+		cleanTask(task)
 		index, task = next(tasks)
 	end
 end
