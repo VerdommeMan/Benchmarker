@@ -124,7 +124,7 @@
 				<token name="Style">0</token>
 				<BinaryString name="Tags"></BinaryString>
 				<bool name="Visible">true</bool>
-				<int name="ZIndex">1</int>
+				<int name="ZIndex">2</int>
 			</Properties>
 			<Item class="UIListLayout" referent="RBX3DFF5CBB7A674FFFB96E2A54ACC7C4A6">
 				<Properties>

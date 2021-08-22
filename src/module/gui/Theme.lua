@@ -148,7 +148,7 @@ local Themes = {
         },
         Column = {
             Primary = C.Black,
-            Secondary = C.D.Black35,
+            Secondary =C.D.Black35,
             TextColor3 = C.White,
             Border = Color3.fromRGB(50, 56, 62)
         },

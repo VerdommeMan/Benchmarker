@@ -10,9 +10,10 @@ local TextService = game:GetService("TextService")
 
 local Column = Data.Theme.Column
 local TableScaffold = guiFolder.components.TableScaffold
+local PADDING = 10 -- extra padding
 
 local function getWidth(string)
-   local x = TextService:GetTextSize(string, 8,"Legacy" , Vector2.new(1000,1000)).X + 2
+   local x = TextService:GetTextSize(string, 8,"Legacy" , Vector2.new(1000,1000)).X + PADDING
    return x > 75 and x or 75
 end
 
@@ -29,22 +30,27 @@ local function createCell(order, text, isHeader)
     return lbl
 end
 
-local function createBorder(order)
+local function createBorder(order, vertical)
     local frame = Instance.new("Frame")
     frame.Name = "Border"
     frame.BorderSizePixel = 0
     frame.BackgroundColor3 = Column.Border
-    frame.AutomaticSize = Enum.AutomaticSize.X
-    frame.Size = UDim2.fromOffset(0, 1)
+    frame.AutomaticSize = vertical and Enum.AutomaticSize.Y or Enum.AutomaticSize.X
+    frame.Size = vertical and UDim2.fromOffset(1, 0) or UDim2.fromOffset(0, 1)
     frame.LayoutOrder = order
     return frame
 end
+
+local columnOrder = 0
+
 
 local function createColumnHolder(width)
     local frame = Instance.new("Frame")
     frame.BackgroundTransparency = 1
     frame.AutomaticSize = Enum.AutomaticSize.Y
     frame.Size = UDim2.fromOffset(width or 75, 0)
+    frame.LayoutOrder = columnOrder
+    columnOrder += 1
     local listLayout = Instance.new("UIListLayout")
     listLayout.FillDirection = Enum.FillDirection.Vertical
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -53,7 +59,9 @@ local function createColumnHolder(width)
 end
 
 local function createShell(name, parent)
+    createBorder(columnOrder, true).Parent = parent
     local shell = createColumnHolder(getWidth(name))
+    columnOrder += 1
     shell.Name = name
     createCell(0, name).Parent = shell
     createBorder(1).Parent = shell
