@@ -3,6 +3,9 @@
 local GuiDirector = {}
 GuiDirector.__index = GuiDirector
 
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
 -- Managers
 local PaneManager = require(script.PaneManager)
 local WindowManager = require(script.WindowManager)
@@ -31,14 +34,12 @@ function GuiDirector.new()
     ResizeHandler(self.root, StatsHandler(getComponent("StatsScaffold")))
     local total = Data.Benchmarks.Total
     
-    total:exempt():changed(function()
-        table.insert(self.panes, PaneManager.new(getComponent("PaneScaffold"), total[total:len()], self.paneHolder))
+    total:added(function(benchmark)
+        table.insert(self.panes, PaneManager.new(getComponent("PaneScaffold"), benchmark, self.paneHolder))
         self.paneControlManager:update()
     end)
 
-    -- #TODO TEMP
-    wait(5)
-    self.root.Parent = game.Players.LocalPlayer.PlayerGui
+    self:_handleParent()
 
    return self
 end
@@ -53,6 +54,14 @@ end
 
 function GuiDirector:hide()
     self.root.Enabled = false
+end
+
+function GuiDirector:_handleParent()
+    if RunService:IsClient() then
+       self.root.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    else
+        self.root.Parent = (Players:GetPlayers()[1] or Players.PlayerAdded:Wait()):WaitForChild("PlayerGui")
+    end
 end
 
 function GuiDirector:destroy()

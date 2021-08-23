@@ -7,10 +7,11 @@ Benchmarker.__index = Benchmarker
 local config = {
     theme = "Dark",
     studioOnly = true,
+    allowedClients = {}, -- empty all, fill with player ids
     yieldtime = 0.1, -- seconds
     displayBasedOnContext = true, -- only display the gui in the server if its called from server an only on the client if its called from client
-    hideCoreGuis = true,
-    defaultFullscreen = false -- decides if the gui will display by on fullscreen on creation
+    hideCoreGuis = true, -- Hides the healthbar, playerlist (block gui view)
+    defaultScreenMode = "Window" -- decide if it starts mimized, window or fullscreen
 }
 
 local Benchmark = require(script:WaitForChild("Benchmark"))
@@ -58,7 +59,8 @@ delay(2, function()
             end
         end,
     
-    })
+    }):Start()
+
     Benchmarker.Create({
         Duration = 5,
         Cycles = 1e6,
@@ -79,6 +81,7 @@ delay(2, function()
         end,
     
     })
+
     Benchmarker.Create({
         Duration = 5,
         Cycles = 1e6,
@@ -144,11 +147,6 @@ delay(2, function()
             bench:Cancel()
         end
     end)
-
---     wait(2)
---     Data.Benchmarks.Total:insert(Benchmark.new({}))
---     wait(2)
---     Data.Benchmarks.Total:insert(Benchmark.new({}))
 end)
 
 
