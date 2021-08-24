@@ -3,8 +3,7 @@
 local GuiDirector = {}
 GuiDirector.__index = GuiDirector
 
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
+local guiFolder = script.Parent
 
 -- Managers
 local PaneManager = require(script.PaneManager)
@@ -12,8 +11,8 @@ local WindowManager = require(script.WindowManager)
 local PaneControlManager = require(script.PaneControlManager)
 local ResizeHandler = require(script.ResizeHandler)
 local StatsHandler = require(script.StatsHandler)
+local Middleware = require(guiFolder.Parent.modules.Middleware)
 
-local guiFolder = script.Parent
 local components = guiFolder.components
 
 local Data = require(guiFolder.Parent.Data)
@@ -23,25 +22,34 @@ local function getComponent(name)
 end
 
 
-function GuiDirector.new()
-    local self = setmetatable({root = guiFolder.Benchmarker:Clone(), panes = {[0] = {pane = getComponent("EmptyPane")}}}, GuiDirector)
+function GuiDirector.new(client)
+    local suc, obj = Middleware.init(client)
+    if not suc then
+        warn(obj)
+        return    
+    end
+    
+    local self = setmetatable({
+        root = guiFolder.Benchmarker:Clone(), 
+        panes = {[0] = {pane = getComponent("EmptyPane")}},
+        middleware = obj
+    }, GuiDirector)
+    
+    self.root.Parent = client.PlayerGui
     local background = self.root.Background
     self:_setVersion()
-    self.mainWindow = WindowManager.new(background:FindFirstChild("Window", true), self.root, true) 
-    self.minmizedWindow = WindowManager.new(self.root.Minimized.window, self.root) 
+    self.mainWindow = WindowManager.new(background:FindFirstChild("Window", true), self.root, true, self.middleware) 
+    self.minmizedWindow = WindowManager.new(self.root.Minimized.window, self.root, false, self.middleware) 
     self.paneHolder = background.Content.VerticalList
     self.paneControlManager = PaneControlManager.new(self.panes, self.paneHolder.Controls) 
     ResizeHandler(self.root, StatsHandler(getComponent("StatsScaffold")))
-    local total = Data.Benchmarks.Total
     
-    total:added(function(benchmark)
+    Data.Benchmarks.Total:added(function(benchmark)
         table.insert(self.panes, PaneManager.new(getComponent("PaneScaffold"), benchmark, self.paneHolder))
         self.paneControlManager:update()
     end)
 
-    self:_handleParent()
-
-   return self
+    return self
 end
 
 function GuiDirector:_setVersion()
@@ -54,14 +62,6 @@ end
 
 function GuiDirector:hide()
     self.root.Enabled = false
-end
-
-function GuiDirector:_handleParent()
-    if RunService:IsClient() then
-       self.root.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-    else
-        self.root.Parent = (Players:GetPlayers()[1] or Players.PlayerAdded:Wait()):WaitForChild("PlayerGui")
-    end
 end
 
 function GuiDirector:destroy()

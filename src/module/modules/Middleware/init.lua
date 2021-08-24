@@ -2,6 +2,7 @@
 -- This way my code has one listener (for server/client), and this deals with if its required from the client or the server
 
 local Middleware = {}
+Middleware.__index = Middleware
 local Connection = {}
 
 local RunService = game:GetService("RunService")
@@ -9,6 +10,8 @@ local CollectionService = game:GetService("CollectionService")
 
 local EventBusTag = "Benchmarker_EventBus"
 local EventBus = Instance.new("RemoteEvent")
+EventBus.Name = EventBusTag
+EventBus.Parent = game.ReplicatedStorage
 CollectionService:AddTag(EventBus, EventBusTag)
 
 local ClientScript = script.ClientInitializer
@@ -51,6 +54,26 @@ end
 local function genId()
     Id += 1
     return Id
+end
+
+local function hasReplicated(instance)
+    return instance:IsDescendantOf(game) and (not instance:IsDescendantOf(game.ServerScriptService)) and (not instance:IsDescendantOf(game.ServerStorage))
+end
+
+local function yieldUntilReplicated(instance: Instance)
+    if not hasReplicated(instance) then
+        local thread = coroutine.running()
+        task.spawn(function()
+            local conn
+            conn = game.DescendantAdded:Connect(function(descendant)
+                if descendant == instance and hasReplicated(instance) then
+                    conn:Disconnect()
+                    task.spawn(thread)
+                end
+            end)   
+        end)
+        coroutine.yield()
+    end
 end
 
 local function yieldForConfirmation(client, timeout)
@@ -97,7 +120,10 @@ end
 local function handleServer(client, instance, eventName, callback)
     local id = genId()
     clients[client][id] = callback
-    EventBus:FireClient(client, id, "Connect", instance, eventName)
+    task.spawn(function()
+        yieldUntilReplicated(instance)
+        EventBus:FireClient(client, "Connect", id, instance, eventName)
+    end)
     return Connection.new(client, id)
 end
 
@@ -124,7 +150,7 @@ function Middleware:listen(instance: Instance, eventName: String, callback: (any
     elseif IS_CLIENT then
         return handleClient(instance, event, callback)
     else
-        return handleServer(self._client, instance, event, callback)
+        return handleServer(self._client, instance, eventName, callback)
     end    
 end
 
@@ -143,4 +169,3 @@ function Middleware:destroy()
 end
 
 return Middleware
-

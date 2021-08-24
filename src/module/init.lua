@@ -4,6 +4,9 @@
 local Benchmarker = {}
 Benchmarker.__index = Benchmarker
 
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
 local config = {
     theme = "Dark",
     studioOnly = true,
@@ -18,12 +21,16 @@ local Benchmark = require(script:WaitForChild("Benchmark"))
 local Data = require(script.Data)
 local benchmarks = Data.Benchmarks
 local GuiDirector = require(script.gui.GuiDirector)
-local guiDirector = GuiDirector.new()
 
 require(script.BenchmarkScheduler)
 require(script.BenchmarkPerformer)
 
-
+local guiDirector
+if RunService:IsClient() then
+   guiDirector = GuiDirector.new(Players.LocalPlayer)
+else
+   guiDirector = GuiDirector.new(Players:GetPlayers()[1] or Players.PlayerAdded:Wait())
+end
 
 delay(2, function()
     Benchmarker.Create({
@@ -54,7 +61,7 @@ delay(2, function()
             
         end,
         ["func creation"] = function()
-            local function sqrt(nr)
+            local function _(nr)
                 return nr ^ 0.5
             end
         end,
@@ -124,6 +131,27 @@ delay(2, function()
             end)()
         end
     })
+    local longstr = ("a"):rep(1e3)
+    Benchmarker.Create({
+        sub = function()
+            local function stringEndsWith(str, endsWith)
+                return str:sub(-#endsWith) == endsWith
+            end
+            for i = 1, 1e3 do
+                stringEndsWith(longstr, "aaaaa")    
+            end
+            
+        end,
+        find = function()
+            local function endsWith(str, char)
+                 return string.find(str, char, #char, true)
+            end
+            for i = 1, 1e3 do
+                endsWith(longstr, "aaaaa")    
+            end
+            
+        end
+    }):Start()
 
     Benchmarker.Create({
         ["shall cancel"] = function()
@@ -159,7 +187,8 @@ end)
 --     Methods = {}, {} or nil denotes all methods, {"specfic"} only does that method
 --     Duration = 5, -- duration for Mean method
 --     Cycles = 1e9, -- Denotes how many cycles it will run for the
---     NamesOFRandom
+--     NamesOFRandom = func,
+--     benchFuncName = func
 -- }
 
 function Benchmarker.Create(config) -- returns a Benchmark

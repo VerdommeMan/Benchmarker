@@ -2,19 +2,19 @@ local WindowManager = {}
 WindowManager.__index = WindowManager
 
 
-local function createHover(gui, enter, leave)
-	gui.MouseEnter:Connect(function() 
+local function createHover(middleware, gui, enter, leave)
+	middleware:listen(gui, "MouseEnter", function() 
 		gui.BackgroundTransparency = enter
 	end)
 
-	gui.MouseLeave:Connect(function() 
+	middleware:listen(gui, "MouseLeave", function() 
 		gui.BackgroundTransparency = (leave or 1)
 	end)
 end
 
-function WindowManager.new(window, root, includeMaximize)
-    local self = setmetatable({window = window, root = root}, WindowManager)
-    self:initClose(function()   end) -- need to figure out how to pass the destroy from main module
+function WindowManager.new(window, root, includeMaximize, middleware)
+    local self = setmetatable({window = window, root = root, middleware = middleware}, WindowManager)
+    self:initClose(function()   end) --#TODO need to figure out how to pass the destroy from main module
     self:initMinimize()
     if includeMaximize then
         self:initMaximize()
@@ -24,15 +24,16 @@ end
 
 function WindowManager:initClose(destroy)
     local close = self.window.Close
-    createHover(close, 0.5)
-    close.Activated:Connect(destroy)
+    createHover(self.middleware, close, 0.5)
+    self.middleware:listen(close, "Activated", destroy)
 end
 
 function WindowManager:initMinimize()
     local close = self.window.Minimize
     local background = self.root.Background
-    createHover(close, 0.8)
-    close.Activated:Connect(function() 
+    createHover(self.middleware, close, 0.8)
+
+    self.middleware:listen(close, "Activated", function() 
        background.Visible = not background.Visible
        background.Parent.Minimized.Visible = not background.Parent.Minimized.Visible
     end)
@@ -45,8 +46,10 @@ function WindowManager:initMaximize()
     self.defaultPos = self.window.Position
     self.head = self.window.Parent.Head
     self.defaultHeadPos = self.head.Position
-    self.window.Maximize.Activated:Connect(function() self:mode() end)
-    createHover(self.window.Maximize, 0.8)
+
+    self.middleware:listen(self.window.Maximize, "Activated", function() self:mode() end)
+    
+    createHover(self.middleware, self.window.Maximize, 0.8)
 end
 
 function WindowManager:fullscreenMode()

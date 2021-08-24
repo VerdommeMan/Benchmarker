@@ -66,7 +66,6 @@ end
 -- allows for special functionality, it calcs the time when requested only when the benchmark is running
 Benchmark.__index = function(t , k)
     if k == "Time" then
-        print("calcing time")
         return calcTime(t._StartTime)
     end
     return Benchmark[k]
@@ -203,10 +202,6 @@ function Benchmark:_initFinished()
             self._FinishedBindeable:Fire()
         end
     end)
-end
-
-if (benchmarks == true) then
-    print()
 end
 
  return Prototype

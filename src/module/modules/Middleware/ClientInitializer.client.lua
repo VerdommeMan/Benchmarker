@@ -42,8 +42,8 @@ function Actions.Destroy()
     script:Destroy()
 end
 
-connEventBus = EventBus.OnClientEvent:Connect(function(action, ...)
-    local action = Actions[action]
+connEventBus = EventBus.OnClientEvent:Connect(function(actionName, ...)
+    local action = Actions[actionName]
     if action then
        action(...)
     else
